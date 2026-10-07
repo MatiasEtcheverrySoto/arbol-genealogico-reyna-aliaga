@@ -47,12 +47,27 @@ El árbol abarca **5 generaciones** y **143 integrantes familiares catalogados**
 
 ---
 
-## 🚀 Cómo Ejecutar la Aplicación
+## 🌐 Acceso en Línea y Despliegue
 
-No requiere instalación de librerías externas. Puedes abrir la aplicación de cualquiera de las siguientes formas:
+La aplicación se encuentra publicada y disponible públicamente:
 
-1. **Doble Clic:** Abre directamente el archivo `index.html` con cualquier navegador web moderno (Google Chrome, Microsoft Edge, Firefox, Safari).
-2. **Servidor Local (Recomendado):**
+* 🔗 **Sitio Web en Vivo (GitHub Pages):** [https://matiasetcheverrysoto.github.io/arbol-genealogico-reyna-aliaga/](https://matiasetcheverrysoto.github.io/arbol-genealogico-reyna-aliaga/)
+* 🚀 **Desplegar en Vercel con 1 Clic:**
+  
+  [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMatiasEtcheverrySoto%2Farbol-genealogico-reyna-aliaga)
+
+---
+
+## 🚀 Cómo Ejecutar y Modificar Localmente
+
+No requiere instalación de librerías ni compiladores complejos. Cualquiera puede clonar el proyecto y modificarlo:
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/MatiasEtcheverrySoto/arbol-genealogico-reyna-aliaga.git
+   ```
+2. **Doble Clic:** Abre directamente el archivo `index.html` con cualquier navegador web moderno (Chrome, Edge, Firefox, Safari).
+3. **Servidor Local (Recomendado):**
    ```bash
    python -m http.server 3000
    ```
