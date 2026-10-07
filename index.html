@@ -390,14 +390,6 @@
         </p>
         <form id="reportErrorForm" onsubmit="return false;">
           <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label for="reportUserName">Tu nombre (opcional):</label>
-            <input type="text" id="reportUserName" placeholder="Ej: Santiago, Laura...">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label for="reportTargetMember">Familiar con error o cambio (opcional):</label>
-            <input type="text" id="reportTargetMember" placeholder="Ej: Rodrigo Etcheverry, o rama familiar...">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
             <label for="reportType">Tipo de corrección:</label>
             <select id="reportType">
               <option value="datos">Datos o parentesco incorrecto</option>
@@ -412,14 +404,9 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-        <button type="button" id="reportWhatsappBtn" class="btn" style="background:#25D366; color:#fff; border:none;" title="Enviar directamente por WhatsApp a la familia">
-          💬 Enviar por WhatsApp
-        </button>
-        <div style="display: flex; gap: 0.5rem;">
-          <button type="button" id="cancelReportBtn" class="btn secondary">Cancelar</button>
-          <button type="button" id="submitReportBtn" class="btn primary">Enviar Reporte</button>
-        </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelReportBtn" class="btn secondary">Cancelar</button>
+        <button type="button" id="submitReportBtn" class="btn primary">Enviar Reporte</button>
       </div>
     </div>
   </div>

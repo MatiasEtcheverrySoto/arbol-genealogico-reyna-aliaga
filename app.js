@@ -754,8 +754,6 @@
     if (cancelReportBtn) cancelReportBtn.addEventListener('click', closeReportErrorModal);
     const submitReportBtn = document.getElementById('submitReportBtn');
     if (submitReportBtn) submitReportBtn.addEventListener('click', submitReportError);
-    const reportWhatsappBtn = document.getElementById('reportWhatsappBtn');
-    if (reportWhatsappBtn) reportWhatsappBtn.addEventListener('click', sendReportViaWhatsapp);
 
     // View Switching
     document.querySelectorAll('.view-btn').forEach(btn => {
@@ -2685,8 +2683,6 @@
     if (reportErrorModal) {
       const descEl = document.getElementById('reportDescription');
       if (descEl) descEl.value = '';
-      const targetEl = document.getElementById('reportTargetMember');
-      if (targetEl) targetEl.value = '';
       reportErrorModal.classList.add('active');
     }
   }
@@ -2703,18 +2699,12 @@
       return;
     }
 
-    const userNameEl = document.getElementById('reportUserName');
-    const userName = (userNameEl && userNameEl.value.trim()) || 'Familiar anónimo';
-    const targetMemberEl = document.getElementById('reportTargetMember');
-    const targetMember = (targetMemberEl && targetMemberEl.value.trim()) || 'General';
     const reportTypeEl = document.getElementById('reportType');
     const reportType = reportTypeEl ? reportTypeEl.value : 'datos';
 
     const reportObj = {
       id: `rep_${Date.now()}`,
       timestamp: new Date().toISOString(),
-      userName,
-      targetMember,
       reportType,
       description: desc
     };
@@ -2738,30 +2728,6 @@
 
     closeReportErrorModal();
     showToast('✅ ¡Muchas gracias! Tu reporte ha sido enviado para corregir el árbol.');
-  }
-
-  function sendReportViaWhatsapp() {
-    const descEl = document.getElementById('reportDescription');
-    const desc = descEl ? descEl.value.trim() : '';
-    if (!desc) {
-      alert('Por favor escribe primero la descripción del error o corrección.');
-      return;
-    }
-    const userNameEl = document.getElementById('reportUserName');
-    const userName = (userNameEl && userNameEl.value.trim()) || 'Familiar';
-    const targetMemberEl = document.getElementById('reportTargetMember');
-    const targetMember = (targetMemberEl && targetMemberEl.value.trim()) || 'Árbol general';
-    const reportTypeEl = document.getElementById('reportType');
-    const reportTypeText = reportTypeEl ? reportTypeEl.options[reportTypeEl.selectedIndex].text : 'Corrección';
-
-    const msg = `*Reporte de error - Árbol Familiar Reyna Aliaga*\n\n` +
-      `*De:* ${userName}\n` +
-      `*Familiar:* ${targetMember}\n` +
-      `*Tipo:* ${reportTypeText}\n` +
-      `*Detalle:* ${desc}`;
-
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
   }
 
   // --- KEYBOARD SHORTCUTS ---
