@@ -13,10 +13,13 @@
   const themes = ['theme-magnolia', 'theme-clean', 'theme-dark'];
 
   // Canvas Transform State
-  let scale = 0.85;
+  const isInitialMobile = window.innerWidth <= 768;
+  let scale = isInitialMobile ? (window.innerWidth <= 480 ? 0.6 : 0.7) : 0.85;
   let panX = 150;
-  let panY = 50;
+  let panY = isInitialMobile ? 30 : 50;
   let isDragging = false;
+  let isActuallyDragging = false;
+  let lastDragEndTime = 0;
   let startX = 0;
   let startY = 0;
   let activeMemberId = null;
@@ -699,44 +702,75 @@
     window.addEventListener('mouseup', onCanvasMouseUp);
     canvasViewport.addEventListener('wheel', onCanvasWheel, { passive: false });
 
-    // Touch Support
+    // Touch Support con gestos táctiles fluidos (Pinch-to-zoom y desplazamiento suave)
     let lastTouchX = 0, lastTouchY = 0, initialDistance = 0;
+    let touchStartX = 0, touchStartY = 0;
+
     canvasViewport.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         isDragging = true;
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
+        isActuallyDragging = false;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        lastTouchX = touchStartX;
+        lastTouchY = touchStartY;
       } else if (e.touches.length === 2) {
         isDragging = false;
+        isActuallyDragging = true;
         initialDistance = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
       }
-    }, { passive: true });
+    }, { passive: false });
 
     canvasViewport.addEventListener('touchmove', (e) => {
       if (e.touches.length === 1 && isDragging) {
         const dx = e.touches[0].clientX - lastTouchX;
         const dy = e.touches[0].clientY - lastTouchY;
+        if (Math.hypot(e.touches[0].clientX - touchStartX, e.touches[0].clientY - touchStartY) > 6) {
+          isActuallyDragging = true;
+        }
         lastTouchX = e.touches[0].clientX;
         lastTouchY = e.touches[0].clientY;
         panX += dx;
         panY += dy;
         applyCanvasTransform();
+        e.preventDefault();
       } else if (e.touches.length === 2) {
+        e.preventDefault();
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        const factor = dist / initialDistance;
-        scale = Math.min(Math.max(scale * factor, 0.2), 2.5);
-        initialDistance = dist;
-        applyCanvasTransform();
-      }
-    }, { passive: true });
+        if (initialDistance > 0) {
+          const factor = dist / initialDistance;
+          const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          const newScale = Math.min(Math.max(scale * factor, 0.15), 2.5);
 
-    canvasViewport.addEventListener('touchend', () => { isDragging = false; });
+          // Zoom fluido centrado en el punto medio de los dos dedos
+          panX = midX - (midX - panX) * (newScale / scale);
+          panY = midY - (midY - panY) * (newScale / scale);
+          scale = newScale;
+          applyCanvasTransform();
+        }
+        initialDistance = dist;
+      }
+    }, { passive: false });
+
+    canvasViewport.addEventListener('touchend', () => {
+      if (isActuallyDragging) {
+        lastDragEndTime = Date.now();
+      }
+      isDragging = false;
+      isActuallyDragging = false;
+    });
+
+    canvasViewport.addEventListener('touchcancel', () => {
+      isDragging = false;
+      isActuallyDragging = false;
+    });
 
     // HUD Zoom & Action controls
     const zoomInEl = document.getElementById('zoomInBtn');
@@ -962,13 +996,18 @@
 
   function onCanvasMouseMove(e) {
     if (!isDragging) return;
+    isActuallyDragging = true;
     panX = e.clientX - startX;
     panY = e.clientY - startY;
     applyCanvasTransform();
   }
 
   function onCanvasMouseUp() {
+    if (isActuallyDragging) {
+      lastDragEndTime = Date.now();
+    }
     isDragging = false;
+    isActuallyDragging = false;
     canvasViewport.classList.remove('dragging');
   }
 
@@ -1009,11 +1048,12 @@
 
   function centerTreeOnPatriarchs() {
     const viewportRect = canvasViewport.getBoundingClientRect();
-    scale = 0.85;
+    const isMobile = window.innerWidth <= 768;
+    scale = isMobile ? (window.innerWidth <= 480 ? 0.6 : 0.7) : 0.85;
     // The patriarchs are horizontally centered in treeDomContainer (~3000px mark)
     const domWidth = treeDomContainer.offsetWidth || 5600;
     panX = (viewportRect.width / 2) - (domWidth / 2 * scale);
-    panY = 60;
+    panY = isMobile ? 30 : 60;
     applyCanvasTransform();
   }
 
@@ -1503,8 +1543,11 @@
       card.appendChild(badgeEl);
     }
 
-    // Click handler to open edit modal
+    // Click handler to open edit modal (protegido contra arrastre accidental en móviles o PC)
     card.addEventListener('click', (e) => {
+      if (Date.now() - lastDragEndTime < 250) {
+        return;
+      }
       e.stopPropagation();
       openMemberModal(member.id);
     });

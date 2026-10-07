@@ -560,6 +560,8 @@ body.theme-dark .actions-dropdown button:hover {
   overflow: hidden;
   position: relative;
   cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
 }
 
 .canvas-viewport.dragging {
@@ -1868,6 +1870,286 @@ body.theme-dark .btn-photo-paste {
 .toast-notification.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ==========================================================================
+   Mobile & Tablet Responsive Design
+   ========================================================================== */
+
+/* Tablets & Small Laptops (<= 992px) */
+@media (max-width: 992px) {
+  .header-left {
+    min-width: 210px;
+  }
+  .header-center {
+    margin: 0 0.8rem;
+    max-width: 440px;
+  }
+}
+
+/* Smartphones & Small Tablets (<= 768px) */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 106px;
+  }
+
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Evitar zoom automático brusco de iOS Safari al enfocar inputs */
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Cabecera optimizada en 2 filas */
+  .app-header {
+    height: var(--header-height);
+    padding: 0.55rem 0.85rem;
+    flex-wrap: wrap;
+    align-content: space-between;
+    gap: 0.45rem;
+  }
+
+  .header-left {
+    min-width: unset;
+    gap: 0.55rem;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .family-crest {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .family-crest svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .family-title {
+    font-size: 1.15rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .family-subtitle {
+    font-size: 0.65rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .header-right {
+    flex-shrink: 0;
+    gap: 0.5rem;
+  }
+
+  #topAddMemberBtn {
+    height: 36px;
+    padding: 0 0.85rem;
+    font-size: 0.76rem;
+    border-radius: 18px;
+    gap: 0.35rem;
+  }
+
+  #topAddMemberBtn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Buscador expandido en la 2da fila */
+  .header-center {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    flex: 0 0 100%;
+  }
+
+  .search-box input {
+    height: 36px;
+    padding: 0 2rem 0 2.2rem;
+  }
+
+  .search-icon {
+    left: 0.75rem;
+    width: 15px;
+    height: 15px;
+  }
+
+  .search-dropdown {
+    top: 40px;
+    max-height: 52vh;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .search-result-item {
+    padding: 0.75rem 0.85rem;
+  }
+
+  /* Área principal y controles flotantes (HUD) */
+  .main-container {
+    top: var(--header-height);
+  }
+
+  .canvas-hud {
+    bottom: max(0.9rem, env(safe-area-inset-bottom, 0.9rem));
+    left: max(0.9rem, env(safe-area-inset-left, 0.9rem));
+    gap: 0.4rem;
+  }
+
+  .zoom-controls {
+    padding: 3px;
+    border-radius: 25px;
+  }
+
+  .hud-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .hud-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .zoom-level {
+    font-size: 0.72rem;
+    padding: 0 0.3rem;
+  }
+
+  /* Modales en celulares */
+  .modal-backdrop {
+    padding: 0.5rem;
+    align-items: center;
+  }
+
+  .modal-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+
+  .modal-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+  }
+
+  .modal-body {
+    padding: 1rem 0.85rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  /* Sección de foto en modal */
+  .photo-edit-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem 0.85rem;
+    gap: 0.9rem;
+  }
+
+  .photo-controls {
+    align-items: center;
+    width: 100%;
+  }
+
+  .photo-controls-row {
+    justify-content: center;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .btn-photo-upload,
+  .btn-photo-paste,
+  .btn-photo-remove {
+    font-size: 0.78rem;
+    padding: 0.48rem 0.85rem;
+  }
+
+  .modal-footer {
+    padding: 0.8rem 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    min-width: 110px;
+    justify-content: center;
+    font-size: 0.82rem;
+    padding: 0.6rem 0.9rem;
+  }
+
+  /* Toast en celulares */
+  .toast-notification {
+    left: 1rem;
+    right: 1rem;
+    bottom: 5.2rem;
+    text-align: center;
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+    border-radius: 12px;
+  }
+
+  /* Vistas secundarias */
+  .branches-container {
+    padding: 1rem 0.75rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .directory-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+}
+
+/* Celulares pequeños (<= 440px) */
+@media (max-width: 440px) {
+  .family-title {
+    font-size: 1.05rem;
+  }
+
+  .family-subtitle {
+    display: none;
+  }
+
+  #topAddMemberBtn {
+    padding: 0 0.65rem;
+    font-size: 0.72rem;
+  }
+
+  .hud-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .zoom-level {
+    display: none;
+  }
+
+  .hud-divider {
+    display: none;
+  }
 }
 
 /* Print Styles */
