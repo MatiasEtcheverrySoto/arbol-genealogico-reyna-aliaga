@@ -331,14 +331,14 @@
 
   // --- INITIALIZATION ---
   function init() {
-    loadData();
-    populateFormBranchOptions();
-    bindEvents();
-    renderAll();
-    centerTreeOnPatriarchs();
-    updatePhotoProgress();
-    initCloudSync();
-    bindCloudEvents();
+    try { loadData(); } catch (e) { console.error('loadData error:', e); }
+    try { populateFormBranchOptions(); } catch (e) { console.error('populateFormBranchOptions error:', e); }
+    try { bindEvents(); } catch (e) { console.error('bindEvents error:', e); }
+    try { renderAll(); } catch (e) { console.error('renderAll error:', e); }
+    try { centerTreeOnPatriarchs(); } catch (e) { console.error('centerTreeOnPatriarchs error:', e); }
+    try { updatePhotoProgress(); } catch (e) { console.error('updatePhotoProgress error:', e); }
+    try { initCloudSync(); } catch (e) { console.error('initCloudSync error:', e); }
+    try { bindCloudEvents(); } catch (e) { console.error('bindCloudEvents error:', e); }
   }
 
   // --- DATA LOADING & PERSISTENCE ---
@@ -1511,6 +1511,7 @@
   // --- MEMBER PROFILE & PHOTO EDIT MODAL ---
   function populateFormBranchOptions() {
     const formBranch = document.getElementById('formBranch');
+    if (!formBranch) return;
     formBranch.innerHTML = '';
     familyData.branches.forEach(b => {
       const opt = document.createElement('option');
