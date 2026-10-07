@@ -1294,7 +1294,19 @@
             subWrap.appendChild(gkRow);
             kidsRow.appendChild(subWrap);
           } else {
-            kidsRow.appendChild(createMemberCard(child, true));
+            if (child.spouseId) {
+              const childCouple = document.createElement('div');
+              childCouple.className = 'couple-group';
+              childCouple.appendChild(createMemberCard(child, true));
+              const chSpouse = getMember(child.spouseId);
+              if (chSpouse) {
+                childCouple.appendChild(createMemberCard(chSpouse, true));
+                renderedInBranch.add(chSpouse.id);
+              }
+              kidsRow.appendChild(childCouple);
+            } else {
+              kidsRow.appendChild(createMemberCard(child, true));
+            }
           }
         });
         groupContainer.appendChild(kidsRow);
@@ -1313,8 +1325,6 @@
     if (unrenderedBranchMembers.length > 0) {
       const unrenderedGroup = document.createElement('div');
       unrenderedGroup.className = 'branch-couples-wrap';
-      unrenderedGroup.style.border = '1px dashed var(--border-color)';
-      unrenderedGroup.style.borderRadius = '12px';
       unrenderedGroup.style.padding = '0.5rem';
 
       const unrenderedRow = document.createElement('div');
@@ -1361,8 +1371,20 @@
         const kidsRow = document.createElement('div');
         kidsRow.className = 'children-row';
         sortedKids.forEach(k => {
-          kidsRow.appendChild(createMemberCard(k, true));
           rendered.add(k.id);
+          if (k.spouseId) {
+            const childCouple = document.createElement('div');
+            childCouple.className = 'couple-group';
+            childCouple.appendChild(createMemberCard(k, true));
+            const kSpouse = getMember(k.spouseId);
+            if (kSpouse) {
+              childCouple.appendChild(createMemberCard(kSpouse, true));
+              rendered.add(kSpouse.id);
+            }
+            kidsRow.appendChild(childCouple);
+          } else {
+            kidsRow.appendChild(createMemberCard(k, true));
+          }
         });
         group.appendChild(kidsRow);
       }
@@ -2772,6 +2794,10 @@
   }
 
   // Start app
-  window.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
 })();
