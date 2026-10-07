@@ -207,12 +207,16 @@
           const cloudM = cloudMembers.find(m => m.id === baseM.id);
           const restored = JSON.parse(JSON.stringify(baseM));
           if (cloudM) {
+            // Preservar nombre y apellidos editados
+            if (cloudM.name) restored.name = cloudM.name;
+            if (cloudM.fullName) restored.fullName = cloudM.fullName;
+            if (cloudM.gender) restored.gender = cloudM.gender;
+            if (cloudM.role) restored.role = cloudM.role;
             if (cloudM.photo) restored.photo = cloudM.photo;
             if (cloudM.notes) restored.notes = cloudM.notes;
             if (cloudM.badge !== undefined && cloudM.badge !== null) restored.badge = cloudM.badge;
             if (cloudM.birthYear) restored.birthYear = cloudM.birthYear;
             if (cloudM.order !== undefined && cloudM.order !== null) restored.order = cloudM.order;
-            if (cloudM.fullName && cloudM.fullName !== cloudM.name) restored.fullName = cloudM.fullName;
           }
           return restored;
         });
@@ -373,6 +377,11 @@
           const existing = (familyData.members || []).find(m => m.id === baseM.id);
           const restored = JSON.parse(JSON.stringify(baseM));
           if (existing) {
+            // Preservar nombre y apellidos editados por el usuario
+            if (existing.name) restored.name = existing.name;
+            if (existing.fullName) restored.fullName = existing.fullName;
+            if (existing.gender) restored.gender = existing.gender;
+            if (existing.role) restored.role = existing.role;
             // Preservar fotos cargadas por el usuario
             if (existing.photo) restored.photo = existing.photo;
             // Preservar notas agregadas por el usuario
@@ -383,8 +392,6 @@
             if (existing.birthYear) restored.birthYear = existing.birthYear;
             // Preservar orden manual si fue cargado
             if (existing.order !== undefined && existing.order !== null) restored.order = existing.order;
-            // Preservar nombre completo si fue modificado
-            if (existing.fullName && existing.fullName !== existing.name) restored.fullName = existing.fullName;
           }
           return restored;
         });
@@ -478,6 +485,10 @@
     return role || '';
   }
 
+  function stripAccents(str) {
+    return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
   function formatToTitleCase(str) {
     if (!str) return '';
     return str.split(/\s+/).map(word => {
@@ -492,7 +503,10 @@
     const n = (member.name || '').trim();
     if (!n) return '';
 
-    if (fn.toLowerCase().startsWith(n.toLowerCase())) {
+    const cleanFn = stripAccents(fn).toLowerCase();
+    const cleanN = stripAccents(n).toLowerCase();
+
+    if (cleanFn.startsWith(cleanN)) {
       const remainder = fn.slice(n.length).trim();
       if (remainder) return remainder;
     }
@@ -871,8 +885,12 @@
     const formFirstNameInput = document.getElementById('formFirstName');
     if (formFirstNameInput) {
       formFirstNameInput.addEventListener('input', () => {
+        const val = formFirstNameInput.value.trim();
+        if (modalMemberName) {
+          modalMemberName.textContent = val ? val.toUpperCase() : 'Integrante';
+        }
         if (!currentModalPhoto) {
-          renderModalPhotoPreview(null, formFirstNameInput.value || 'Nuevo');
+          renderModalPhotoPreview(null, val || 'Nuevo');
         }
       });
     }
@@ -1500,19 +1518,10 @@
     nameEl.textContent = member.name;
     card.appendChild(nameEl);
 
-    // Surnames / Apellidos (heredados del padre y de la madre)
+    // Surnames / Apellidos (heredados del padre y de la madre o cargados)
     const surnameEl = document.createElement('div');
     surnameEl.className = 'card-surnames';
-    let surnames = '';
-    if (member.fullName && member.fullName.trim()) {
-      const nameParts = member.name.trim().split(/\s+/);
-      const fullParts = member.fullName.trim().split(/\s+/);
-      if (fullParts.length > nameParts.length) {
-        surnames = fullParts.slice(nameParts.length).join(' ');
-      } else if (fullParts.length > 1 && !member.name.includes(' ')) {
-        surnames = fullParts.slice(1).join(' ');
-      }
-    }
+    const surnames = getMemberSurnames(member);
     if (surnames) {
       surnameEl.textContent = surnames;
     } else {
@@ -1850,11 +1859,12 @@
       return;
     }
 
+    const cleanQuery = stripAccents(query);
     const matches = familyData.members.filter(m => {
-      const matchName = m.name.toLowerCase().includes(query);
-      const matchFull = m.fullName && m.fullName.toLowerCase().includes(query);
-      const matchRole = m.role && m.role.toLowerCase().includes(query);
-      const matchBadge = m.badge && m.badge.toLowerCase().includes(query);
+      const matchName = stripAccents(m.name || '').toLowerCase().includes(cleanQuery);
+      const matchFull = m.fullName && stripAccents(m.fullName).toLowerCase().includes(cleanQuery);
+      const matchRole = m.role && stripAccents(m.role).toLowerCase().includes(cleanQuery);
+      const matchBadge = m.badge && stripAccents(m.badge).toLowerCase().includes(cleanQuery);
       return matchName || matchFull || matchRole || matchBadge;
     }).slice(0, 10);
 
@@ -1934,7 +1944,9 @@
     const full = (member.fullName || '').trim();
 
     if (full) {
-      if (rawName && full.toLowerCase().startsWith(rawName.toLowerCase())) {
+      const cleanFull = stripAccents(full).toLowerCase();
+      const cleanRaw = stripAccents(rawName).toLowerCase();
+      if (cleanRaw && cleanFull.startsWith(cleanRaw)) {
         firstName = full.slice(0, rawName.length).trim();
         lastName = full.slice(rawName.length).trim();
       } else {
