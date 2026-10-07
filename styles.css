@@ -405,6 +405,18 @@ body.theme-dark .view-switcher {
   transform: translateY(-1px);
 }
 
+.action-btn.success-btn {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+}
+
+.action-btn.success-btn:hover {
+  background: linear-gradient(135deg, #047857, #065f46);
+  transform: translateY(-1px);
+}
+
 /* Actions Dropdown */
 .actions-dropdown {
   position: absolute;
@@ -832,6 +844,18 @@ body.theme-dark .branch-column {
   letter-spacing: 0.3px;
 }
 
+.card-surnames {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--card-branch-color, var(--accent-burgundy));
+  opacity: 0.88;
+  text-align: center;
+  line-height: 1.15;
+  margin-top: -0.05rem;
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.2px;
+}
+
 .card-role {
   font-size: 0.68rem;
   color: var(--text-muted);
@@ -1192,6 +1216,33 @@ body.theme-dark .directory-table tr:hover td {
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1;
+}
+
+/* Quick Relation Actions in Modal */
+.modal-quick-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+  padding: 0.65rem 0.9rem;
+  background: rgba(114, 47, 55, 0.05);
+  border: 1px solid rgba(114, 47, 55, 0.15);
+  border-radius: 10px;
+}
+
+body.theme-dark .modal-quick-actions {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.quick-actions-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 0.2rem;
 }
 
 /* Photo Management Panel */

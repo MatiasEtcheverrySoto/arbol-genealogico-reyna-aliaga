@@ -61,6 +61,10 @@
   const memberPhotoUrlInput = document.getElementById('memberPhotoUrlInput');
   const loadUrlPhotoBtn = document.getElementById('loadUrlPhotoBtn');
   const removePhotoBtn = document.getElementById('removePhotoBtn');
+  const modalQuickActions = document.getElementById('modalQuickActions');
+  const modalAddChildBtn = document.getElementById('modalAddChildBtn');
+  const modalAddSpouseBtn = document.getElementById('modalAddSpouseBtn');
+  const topAddMemberBtn = document.getElementById('topAddMemberBtn');
 
   // Actions menu
   const actionsMenuBtn = document.getElementById('actionsMenuBtn');
@@ -94,7 +98,7 @@
   }
 
   // --- DATA LOADING & PERSISTENCE ---
-  const STORAGE_KEY = 'familia_reyna_aliaga_v1';
+  const STORAGE_KEY = 'familia_reyna_aliaga_v3';
 
   function loadData() {
     try {
@@ -103,6 +107,23 @@
         familyData = JSON.parse(stored);
       } else {
         familyData = JSON.parse(JSON.stringify(FAMILY_TREE_DATA));
+        // Migrar fotos previas si existen en v2 o v1
+        const oldStored = localStorage.getItem('familia_reyna_aliaga_v2') || localStorage.getItem('familia_reyna_aliaga_v1');
+        if (oldStored) {
+          try {
+            const oldData = JSON.parse(oldStored);
+            if (oldData && oldData.members) {
+              oldData.members.forEach(oldM => {
+                if (oldM.photo) {
+                  const target = familyData.members.find(m => m.id === oldM.id);
+                  if (target) target.photo = oldM.photo;
+                }
+              });
+            }
+          } catch (migErr) {
+            console.warn('Migración de fotos previa:', migErr);
+          }
+        }
         saveData();
       }
     } catch (e) {
@@ -238,13 +259,46 @@
     printTreeBtn.addEventListener('click', () => window.print());
     toggleThemeBtn.addEventListener('click', toggleTheme);
     resetDataBtn.addEventListener('click', confirmResetData);
-    addMemberBtn.addEventListener('click', openAddMemberModal);
+    if (addMemberBtn) addMemberBtn.addEventListener('click', () => openAddMemberModal());
+    const topAddBtn = document.getElementById('topAddMemberBtn');
+    if (topAddBtn) topAddBtn.addEventListener('click', () => openAddMemberModal());
+    const dirAddBtn = document.getElementById('dirAddMemberBtn');
+    if (dirAddBtn) dirAddBtn.addEventListener('click', () => openAddMemberModal());
 
     // Modal Events
     modalCloseBtn.addEventListener('click', closeModal);
     cancelModalBtn.addEventListener('click', closeModal);
     saveMemberBtn.addEventListener('click', saveModalMember);
     deleteMemberBtn.addEventListener('click', confirmDeleteMember);
+
+    if (modalAddChildBtn) {
+      modalAddChildBtn.addEventListener('click', () => {
+        if (!activeMemberId) return;
+        const parentMember = getMember(activeMemberId);
+        if (!parentMember) return;
+        openAddMemberModal({
+          parentId: parentMember.id,
+          branch: parentMember.branch,
+          generation: Math.min(5, (parentMember.generation || 1) + 1),
+          role: 'Hijo/a'
+        });
+      });
+    }
+
+    if (modalAddSpouseBtn) {
+      modalAddSpouseBtn.addEventListener('click', () => {
+        if (!activeMemberId) return;
+        const spouseMember = getMember(activeMemberId);
+        if (!spouseMember) return;
+        openAddMemberModal({
+          spouseId: spouseMember.id,
+          branch: spouseMember.branch,
+          generation: spouseMember.generation || 2,
+          role: 'Cónyuge'
+        });
+      });
+    }
+
     memberPhotoFileInput.addEventListener('change', handlePhotoFileSelect);
     loadUrlPhotoBtn.addEventListener('click', handlePhotoUrlLoad);
     removePhotoBtn.addEventListener('click', () => {
@@ -618,6 +672,24 @@
     nameEl.textContent = member.name;
     card.appendChild(nameEl);
 
+    // Surnames / Apellidos (heredados del padre y de la madre)
+    if (member.fullName && member.fullName.trim()) {
+      const nameParts = member.name.trim().split(/\s+/);
+      const fullParts = member.fullName.trim().split(/\s+/);
+      let surnames = '';
+      if (fullParts.length > nameParts.length) {
+        surnames = fullParts.slice(nameParts.length).join(' ');
+      } else if (fullParts.length > 1 && !member.name.includes(' ')) {
+        surnames = fullParts.slice(1).join(' ');
+      }
+      if (surnames) {
+        const surnameEl = document.createElement('div');
+        surnameEl.className = 'card-surnames';
+        surnameEl.textContent = surnames;
+        card.appendChild(surnameEl);
+      }
+    }
+
     // Role / Generation
     if (!isCompact || member.badge) {
       const roleEl = document.createElement('div');
@@ -667,7 +739,7 @@
       card.classList.remove('drag-over');
     });
 
-    card.addEventListener('drop', (e) => {
+    card.addEventListener('drop', async (e) => {
       e.preventDefault();
       e.stopPropagation();
       card.classList.remove('drag-over');
@@ -675,17 +747,20 @@
       const files = e.dataTransfer.files;
       if (files && files.length > 0 && files[0].type.startsWith('image/')) {
         const file = files[0];
-        const reader = new FileReader();
-        reader.onload = (loadEvent) => {
+        try {
+          showToast('⏳ Optimizando fotografía...');
+          const compressed = await compressImageFile(file);
           const member = getMember(memberId);
           if (member) {
-            member.photo = loadEvent.target.result;
+            member.photo = compressed;
             saveData();
             renderAll();
             showToast(`✅ Foto de ${member.name} actualizada.`);
           }
-        };
-        reader.readAsDataURL(file);
+        } catch (err) {
+          console.error(err);
+          showToast('⚠️ No se pudo procesar la foto.');
+        }
       }
     });
   }
@@ -945,7 +1020,7 @@
             ? `<img src="${m.photo}" class="search-result-avatar" alt="${m.name}">` 
             : `<div class="search-result-avatar" style="background-color: ${branch.color}">${getInitials(m.name)}</div>`}
           <div class="search-result-info">
-            <div class="search-result-name">${m.name} ${m.badge ? `(${m.badge})` : ''}</div>
+            <div class="search-result-name">${m.fullName || m.name} ${m.badge ? `(${m.badge})` : ''}</div>
             <div class="search-result-sub">${branch.name} • Gen ${m.generation} • ${m.role || ''}</div>
           </div>
         `;
@@ -994,6 +1069,10 @@
     modalBranchTag.textContent = branch.name;
     modalBranchTag.style.backgroundColor = branch.color;
 
+    // Show delete & quick actions for existing member
+    if (deleteMemberBtn) deleteMemberBtn.style.display = 'inline-block';
+    if (modalQuickActions) modalQuickActions.style.display = 'flex';
+
     // Form fields
     document.getElementById('formMemberId').value = member.id;
     document.getElementById('formName').value = member.name;
@@ -1014,7 +1093,7 @@
     memberModal.classList.add('active');
   }
 
-  function populateSpouseAndParentSelects(currentMember) {
+  function populateSpouseAndParentSelects(currentMember = {}) {
     const formSpouse = document.getElementById('formSpouse');
     const formParent = document.getElementById('formParent');
 
@@ -1022,7 +1101,7 @@
     formParent.innerHTML = '<option value="">(Ninguno / Raíz)</option>';
 
     familyData.members.forEach(m => {
-      if (m.id === currentMember.id) return;
+      if (currentMember.id && m.id === currentMember.id) return;
 
       const optSpouse = document.createElement('option');
       optSpouse.value = m.id;
@@ -1047,22 +1126,54 @@
       modalPhotoPreview.appendChild(img);
       modalPhotoPreview.classList.remove('empty');
     } else {
-      modalPhotoPreview.textContent = getInitials(name);
+      modalPhotoPreview.textContent = getInitials(name || 'Nuevo');
       modalPhotoPreview.classList.add('empty');
     }
   }
 
-  function handlePhotoFileSelect(e) {
+  // Client-side image compressor & square cropper (reduces 10MB to ~35KB)
+  function compressImageFile(file, maxDimension = 400, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const minDim = Math.min(width, height);
+          const sx = (width - minDim) / 2;
+          const sy = (height - minDim) / 2;
+
+          canvas.width = maxDimension;
+          canvas.height = maxDimension;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, maxDimension, maxDimension);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(e.target.result);
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePhotoFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      currentModalPhoto = loadEvent.target.result;
-      renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value);
-      showToast('📸 Foto cargada. Recuerda pulsar "Guardar Cambios".');
-    };
-    reader.readAsDataURL(file);
+    try {
+      showToast('⏳ Optimizando fotografía...');
+      currentModalPhoto = await compressImageFile(file);
+      renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
+      showToast('📸 Foto lista y optimizada. Recuerda pulsar "Guardar Cambios".');
+    } catch (err) {
+      console.error(err);
+      showToast('⚠️ No se pudo procesar la foto.');
+    }
   }
 
   function handlePhotoUrlLoad() {
@@ -1070,37 +1181,52 @@
     if (!url) return;
 
     currentModalPhoto = url;
-    renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value);
+    renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
     memberPhotoUrlInput.value = '';
     showToast('📸 Enlace de imagen cargado.');
   }
 
   function saveModalMember() {
-    const id = document.getElementById('formMemberId').value;
-    let member = getMember(id);
+    const rawName = document.getElementById('formName').value.trim();
+    if (!rawName) {
+      alert('Por favor escribe al menos el nombre de pila de la persona.');
+      return;
+    }
 
-    if (!member) {
-      // New member creation
-      member = { id: id || `member_${Date.now()}` };
+    let id = document.getElementById('formMemberId').value;
+    let member = id ? getMember(id) : null;
+
+    const isNew = !member;
+    if (isNew) {
+      id = `integrante_${Date.now()}`;
+      member = { id };
       familyData.members.push(member);
     }
 
-    member.name = document.getElementById('formName').value.trim().toUpperCase() || 'SIN NOMBRE';
+    member.name = rawName.toUpperCase();
     member.fullName = document.getElementById('formFullName').value.trim();
     member.branch = document.getElementById('formBranch').value;
-    member.generation = parseInt(document.getElementById('formGeneration').value, 10);
-    member.role = document.getElementById('formRole').value.trim();
+    member.generation = parseInt(document.getElementById('formGeneration').value, 10) || 3;
+    member.role = document.getElementById('formRole').value.trim() || (isNew ? 'Integrante' : '');
     member.badge = document.getElementById('formBadge').value.trim();
-    member.gender = document.getElementById('formGender').value;
+    member.gender = document.getElementById('formGender').value || 'M';
     member.spouseId = document.getElementById('formSpouse').value || null;
     member.parentId = document.getElementById('formParent').value || null;
     member.notes = document.getElementById('formNotes').value.trim();
     member.photo = currentModalPhoto;
 
+    // Reciprocal spouse connection
+    if (member.spouseId) {
+      const spouse = getMember(member.spouseId);
+      if (spouse && !spouse.spouseId) {
+        spouse.spouseId = member.id;
+      }
+    }
+
     saveData();
     closeModal();
     renderAll();
-    showToast(`💾 Datos de ${member.name} guardados correctamente.`);
+    showToast(isNew ? `🎉 ${member.name} añadido al árbol familiar.` : `💾 Datos de ${member.name} guardados correctamente.`);
   }
 
   function confirmDeleteMember() {
@@ -1117,23 +1243,36 @@
     }
   }
 
-  function openAddMemberModal() {
-    const newId = `integrante_${Date.now()}`;
-    const newMember = {
-      id: newId,
-      name: '',
-      fullName: '',
-      branch: 'patron',
-      generation: 4,
-      role: 'Nuevo integrante',
-      badge: '',
-      gender: 'M',
-      photo: null,
-      notes: ''
-    };
+  function openAddMemberModal(preset = {}) {
+    activeMemberId = null;
+    currentModalPhoto = null;
 
-    openMemberModal(newId);
     modalMemberName.textContent = 'Nuevo Integrante Familiar';
+    modalBranchTag.textContent = 'Nuevo';
+    modalBranchTag.style.backgroundColor = '#722F37';
+
+    // Hide delete & quick relation actions when adding a new member
+    if (deleteMemberBtn) deleteMemberBtn.style.display = 'none';
+    if (modalQuickActions) modalQuickActions.style.display = 'none';
+
+    document.getElementById('formMemberId').value = '';
+    document.getElementById('formName').value = preset.name || '';
+    document.getElementById('formFullName').value = preset.fullName || '';
+    document.getElementById('formBranch').value = preset.branch || 'graciela';
+    document.getElementById('formGeneration').value = preset.generation || 3;
+    document.getElementById('formRole').value = preset.role || '';
+    document.getElementById('formBadge').value = preset.badge || '';
+    document.getElementById('formGender').value = preset.gender || 'M';
+    document.getElementById('formNotes').value = preset.notes || '';
+
+    populateSpouseAndParentSelects({
+      id: null,
+      spouseId: preset.spouseId || null,
+      parentId: preset.parentId || null
+    });
+
+    renderModalPhotoPreview(null, 'Nuevo');
+    memberModal.classList.add('active');
   }
 
   function closeModal() {

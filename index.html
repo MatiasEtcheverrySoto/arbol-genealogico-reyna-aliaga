@@ -82,6 +82,12 @@
         </button>
       </div>
 
+      <!-- Add Member Direct Button -->
+      <button id="topAddMemberBtn" class="action-btn success-btn" title="Agregar un nuevo familiar al árbol">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>+ Agregar Familiar</span>
+      </button>
+
       <!-- More Actions Menu Button -->
       <button id="actionsMenuBtn" class="action-btn primary" title="Herramientas y exportación">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
@@ -234,6 +240,17 @@
               🗑️ Quitar foto actual
             </button>
           </div>
+        </div>
+
+        <!-- Quick Relation Actions (Visible when editing an existing member) -->
+        <div id="modalQuickActions" class="modal-quick-actions">
+          <span class="quick-actions-label">Vínculos rápidos:</span>
+          <button type="button" id="modalAddChildBtn" class="btn secondary small">
+            👶 + Agregar Hijo/a
+          </button>
+          <button type="button" id="modalAddSpouseBtn" class="btn secondary small">
+            💍 + Agregar Pareja / Cónyuge
+          </button>
         </div>
 
         <!-- Form fields -->
