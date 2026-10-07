@@ -271,6 +271,45 @@
     saveMemberBtn.addEventListener('click', saveModalMember);
     deleteMemberBtn.addEventListener('click', confirmDeleteMember);
 
+    const memberForm = document.getElementById('memberForm');
+    if (memberForm) {
+      memberForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveModalMember();
+      });
+    }
+
+    const formParentInput = document.getElementById('formParent');
+    if (formParentInput) {
+      formParentInput.addEventListener('change', (e) => {
+        const pId = e.target.value;
+        if (pId) {
+          const parent = getMember(pId);
+          if (parent) {
+            document.getElementById('formBranch').value = parent.branch;
+            const nextGen = Math.min(5, (parent.generation || 2) + 1);
+            document.getElementById('formGeneration').value = nextGen;
+            const br = getBranch(parent.branch);
+            modalBranchTag.textContent = br.name;
+            modalBranchTag.style.backgroundColor = br.color;
+            const roleEl = document.getElementById('formRole');
+            if (roleEl && (!roleEl.value || roleEl.value === 'Nuevo integrante' || roleEl.value === 'Integrante')) {
+              roleEl.value = nextGen === 3 ? 'Nieto' : (nextGen === 4 ? 'Bisnieto' : 'Tataranieto');
+            }
+          }
+        }
+      });
+    }
+
+    const formBranchInput = document.getElementById('formBranch');
+    if (formBranchInput) {
+      formBranchInput.addEventListener('change', (e) => {
+        const br = getBranch(e.target.value);
+        modalBranchTag.textContent = br.name;
+        modalBranchTag.style.backgroundColor = br.color;
+      });
+    }
+
     if (modalAddChildBtn) {
       modalAddChildBtn.addEventListener('click', () => {
         if (!activeMemberId) return;
@@ -1100,18 +1139,25 @@
     formSpouse.innerHTML = '<option value="">(Ninguno / Soltero)</option>';
     formParent.innerHTML = '<option value="">(Ninguno / Raíz)</option>';
 
-    familyData.members.forEach(m => {
+    // Sort alphabetically by full name for convenient selection
+    const sorted = [...familyData.members].sort((a, b) => {
+      const nameA = (a.fullName || a.name || '').toLowerCase();
+      const nameB = (b.fullName || b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    sorted.forEach(m => {
       if (currentMember.id && m.id === currentMember.id) return;
 
       const optSpouse = document.createElement('option');
       optSpouse.value = m.id;
-      optSpouse.textContent = `${m.name} (${getBranch(m.branch).name})`;
+      optSpouse.textContent = `${m.fullName || m.name} (${getBranch(m.branch).name})`;
       if (m.id === currentMember.spouseId) optSpouse.selected = true;
       formSpouse.appendChild(optSpouse);
 
       const optParent = document.createElement('option');
       optParent.value = m.id;
-      optParent.textContent = `${m.name} (${getBranch(m.branch).name} - Gen ${m.generation})`;
+      optParent.textContent = `${m.fullName || m.name} (${getBranch(m.branch).name} - Gen ${m.generation})`;
       if (m.id === currentMember.parentId) optParent.selected = true;
       formParent.appendChild(optParent);
     });
@@ -1244,12 +1290,16 @@
   }
 
   function openAddMemberModal(preset = {}) {
+    if (actionsDropdown) actionsDropdown.classList.remove('active');
     activeMemberId = null;
     currentModalPhoto = null;
 
+    const branchId = preset.branch || 'graciela';
+    const br = getBranch(branchId);
+
     modalMemberName.textContent = 'Nuevo Integrante Familiar';
-    modalBranchTag.textContent = 'Nuevo';
-    modalBranchTag.style.backgroundColor = '#722F37';
+    modalBranchTag.textContent = br.name;
+    modalBranchTag.style.backgroundColor = br.color;
 
     // Hide delete & quick relation actions when adding a new member
     if (deleteMemberBtn) deleteMemberBtn.style.display = 'none';
@@ -1258,9 +1308,9 @@
     document.getElementById('formMemberId').value = '';
     document.getElementById('formName').value = preset.name || '';
     document.getElementById('formFullName').value = preset.fullName || '';
-    document.getElementById('formBranch').value = preset.branch || 'graciela';
-    document.getElementById('formGeneration').value = preset.generation || 3;
-    document.getElementById('formRole').value = preset.role || '';
+    document.getElementById('formBranch').value = branchId;
+    document.getElementById('formGeneration').value = preset.generation || 4;
+    document.getElementById('formRole').value = preset.role || 'Nuevo integrante';
     document.getElementById('formBadge').value = preset.badge || '';
     document.getElementById('formGender').value = preset.gender || 'M';
     document.getElementById('formNotes').value = preset.notes || '';
@@ -1270,6 +1320,13 @@
       spouseId: preset.spouseId || null,
       parentId: preset.parentId || null
     });
+
+    if (preset.parentId) {
+      document.getElementById('formParent').value = preset.parentId;
+    }
+    if (preset.spouseId) {
+      document.getElementById('formSpouse').value = preset.spouseId;
+    }
 
     renderModalPhotoPreview(null, 'Nuevo');
     memberModal.classList.add('active');

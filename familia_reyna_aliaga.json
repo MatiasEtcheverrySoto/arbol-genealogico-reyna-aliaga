@@ -17,7 +17,7 @@
     {
       "id": "graciela",
       "name": "Rama Graciela",
-      "headName": "Graciela & Héctor",
+      "headName": "Graciela Reyna & Héctor Etcheverry",
       "color": "#8B6F55",
       "badgeColor": "#755941",
       "textColor": "#ffffff"
@@ -41,7 +41,7 @@
     {
       "id": "marialaura",
       "name": "Rama María Laura",
-      "headName": "María Laura & Jorge",
+      "headName": "María Laura Reyna & Jorge Pérez Sever",
       "color": "#6C3A6E",
       "badgeColor": "#562A58",
       "textColor": "#ffffff"
@@ -49,7 +49,7 @@
     {
       "id": "cecilia",
       "name": "Rama Cecilia",
-      "headName": "Cecilia & Ernesto",
+      "headName": "Cecilia Reyna & Ernesto de Cabrera",
       "color": "#566573",
       "badgeColor": "#424E5A",
       "textColor": "#ffffff"
@@ -57,7 +57,7 @@
     {
       "id": "adriana",
       "name": "Rama Adriana",
-      "headName": "Adriana & Carlos",
+      "headName": "Adriana Reyna & Carlos Bourtolusi",
       "color": "#B76E79",
       "badgeColor": "#9E5964",
       "textColor": "#ffffff"
@@ -81,7 +81,7 @@
     {
       "id": "isabel",
       "name": "Rama Isabel",
-      "headName": "Isabel & Roberto",
+      "headName": "Isabel Reyna & Roberto Nietzsche",
       "color": "#D35400",
       "badgeColor": "#BA4A00",
       "textColor": "#ffffff"
@@ -97,7 +97,7 @@
     {
       "id": "francisco",
       "name": "Rama Francisco",
-      "headName": "Francisco & María Laura",
+      "headName": "Francisco Reyna & María Laura Pueyrredón",
       "color": "#1B4F72",
       "badgeColor": "#154360",
       "textColor": "#ffffff"
@@ -143,7 +143,7 @@
     {
       "id": "hector",
       "name": "HECTOR",
-      "fullName": "Héctor",
+      "fullName": "Héctor Etcheverry",
       "branch": "graciela",
       "generation": 2,
       "gender": "M",
@@ -154,7 +154,7 @@
     {
       "id": "mateo_g",
       "name": "MATEO",
-      "fullName": "Mateo",
+      "fullName": "Mateo Etcheverry Reyna",
       "branch": "graciela",
       "generation": 3,
       "gender": "M",
@@ -166,7 +166,7 @@
     {
       "id": "susana_g",
       "name": "SUSANA",
-      "fullName": "Susana",
+      "fullName": "Susana Nuccio",
       "branch": "graciela",
       "generation": 3,
       "gender": "F",
@@ -177,7 +177,7 @@
     {
       "id": "milagros_g",
       "name": "MILAGROS",
-      "fullName": "Milagros",
+      "fullName": "Milagros Etcheverry Nuccio",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -188,7 +188,7 @@
     {
       "id": "maria_paz_g",
       "name": "MARÍA PAZ",
-      "fullName": "María Paz",
+      "fullName": "María Paz Etcheverry Nuccio",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -199,7 +199,7 @@
     {
       "id": "trinidad_g",
       "name": "TRINIDAD",
-      "fullName": "Trinidad",
+      "fullName": "Trinidad Etcheverry Nuccio",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -210,7 +210,7 @@
     {
       "id": "juan_g",
       "name": "JUAN",
-      "fullName": "Juan",
+      "fullName": "Juan Etcheverry Nuccio",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
@@ -221,7 +221,7 @@
     {
       "id": "rodrigo_g",
       "name": "RODRIGO",
-      "fullName": "Rodrigo",
+      "fullName": "Rodrigo Etcheverry Reyna",
       "branch": "graciela",
       "generation": 3,
       "gender": "M",
@@ -233,7 +233,7 @@
     {
       "id": "carolina_g",
       "name": "CAROLINA",
-      "fullName": "Carolina",
+      "fullName": "Carolina Soto",
       "branch": "graciela",
       "generation": 3,
       "gender": "F",
@@ -244,7 +244,7 @@
     {
       "id": "guadalupe_g",
       "name": "GUADALUPE",
-      "fullName": "Guadalupe",
+      "fullName": "Guadalupe Etcheverry Soto",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -255,7 +255,7 @@
     {
       "id": "victoria_g",
       "name": "VICTORIA",
-      "fullName": "Victoria",
+      "fullName": "Victoria Etcheverry Soto",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -266,7 +266,7 @@
     {
       "id": "matias_g",
       "name": "MATÍAS",
-      "fullName": "Matías",
+      "fullName": "Matías Etcheverry Soto",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
@@ -275,9 +275,21 @@
       "photo": null
     },
     {
+      "id": "tomas_rodrigo_g",
+      "name": "TOMÁS",
+      "fullName": "Tomás Etcheverry Soto",
+      "branch": "graciela",
+      "generation": 4,
+      "gender": "M",
+      "role": "Bisnieto",
+      "parentId": "rodrigo_g",
+      "photo": null,
+      "notes": "Hijo de Rodrigo Etcheverry Reyna y Carolina Soto."
+    },
+    {
       "id": "jimena_g",
       "name": "JIMENA",
-      "fullName": "Jimena",
+      "fullName": "Jimena Etcheverry Reyna",
       "branch": "graciela",
       "generation": 3,
       "gender": "F",
@@ -295,34 +307,49 @@
       "gender": "M",
       "role": "Cónyuge Nieto",
       "spouseId": "jimena_g",
-      "photo": null
+      "photo": null,
+      "notes": "Cónyuge de Jimena. Apellido no especificado."
     },
     {
       "id": "andres_g",
       "name": "ANDRÉS",
-      "fullName": "Andrés",
+      "fullName": "Andrés Ameri Etcheverry",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
       "role": "Bisnieto",
       "parentId": "jimena_g",
-      "photo": null
+      "photo": null,
+      "notes": "Hijastro de Ariel. Primer apellido paterno: Ameri, materno: Etcheverry."
     },
     {
       "id": "joaquin_g",
       "name": "JOAQUÍN",
-      "fullName": "Joaquín",
+      "fullName": "Joaquín Ameri Etcheverry",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
       "role": "Bisnieto",
       "parentId": "jimena_g",
-      "photo": null
+      "photo": null,
+      "notes": "Hijastro de Ariel. Primer apellido paterno: Ameri, materno: Etcheverry."
+    },
+    {
+      "id": "gaspar_g",
+      "name": "GASPAR",
+      "fullName": "Gaspar Etcheverry",
+      "branch": "graciela",
+      "generation": 4,
+      "gender": "M",
+      "role": "Bisnieto",
+      "parentId": "jimena_g",
+      "photo": null,
+      "notes": "Hijo de Jimena Etcheverry Reyna."
     },
     {
       "id": "rocio_g",
       "name": "ROCÍO",
-      "fullName": "Rocío",
+      "fullName": "Rocío Etcheverry Reyna",
       "branch": "graciela",
       "generation": 3,
       "gender": "F",
@@ -333,8 +360,8 @@
     },
     {
       "id": "juan_rocio_g",
-      "name": "JUAN",
-      "fullName": "Juan",
+      "name": "JULIO CÉSAR",
+      "fullName": "Julio César Rubio",
       "branch": "graciela",
       "generation": 3,
       "gender": "M",
@@ -345,7 +372,7 @@
     {
       "id": "santiago_rocio_g",
       "name": "SANTIAGO",
-      "fullName": "Santiago",
+      "fullName": "Santiago Rubio Etcheverry",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
@@ -356,7 +383,7 @@
     {
       "id": "mia_rocio_g",
       "name": "MIA",
-      "fullName": "Mia",
+      "fullName": "Mia Rubio Etcheverry",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -367,7 +394,7 @@
     {
       "id": "lucia_rocio_g",
       "name": "LUCÍA",
-      "fullName": "Lucía",
+      "fullName": "Lucía Rubio Etcheverry",
       "branch": "graciela",
       "generation": 4,
       "gender": "F",
@@ -378,7 +405,7 @@
     {
       "id": "martin_g",
       "name": "MARTÍN",
-      "fullName": "Martín",
+      "fullName": "Martín Etcheverry Reyna",
       "branch": "graciela",
       "generation": 3,
       "gender": "M",
@@ -390,7 +417,7 @@
     {
       "id": "rocio_martin_g",
       "name": "ROCÍO",
-      "fullName": "Rocío",
+      "fullName": "Rocío González",
       "branch": "graciela",
       "generation": 3,
       "gender": "F",
@@ -401,7 +428,7 @@
     {
       "id": "santiago_martin_g",
       "name": "SANTIAGO",
-      "fullName": "Santiago",
+      "fullName": "Santiago Etcheverry González",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
@@ -412,13 +439,25 @@
     {
       "id": "joaquin_martin_g",
       "name": "JOAQUÍN",
-      "fullName": "Joaquín",
+      "fullName": "Joaquín Etcheverry González",
       "branch": "graciela",
       "generation": 4,
       "gender": "M",
       "role": "Bisnieto",
       "parentId": "martin_g",
       "photo": null
+    },
+    {
+      "id": "ramiro_g",
+      "name": "RAMIRO",
+      "fullName": "Ramiro Etcheverry Reyna",
+      "branch": "graciela",
+      "generation": 3,
+      "gender": "M",
+      "role": "Nieto",
+      "parentId": "graciela",
+      "photo": null,
+      "notes": "Hijo de Graciela Reyna Aliaga y Héctor Etcheverry."
     },
     {
       "id": "carlos_rama",
@@ -446,7 +485,7 @@
     {
       "id": "mercedes_c",
       "name": "MERCEDES",
-      "fullName": "Mercedes",
+      "fullName": "Mercedes Reyna",
       "branch": "carlos",
       "generation": 3,
       "gender": "F",
@@ -469,7 +508,7 @@
     {
       "id": "ramiro_c",
       "name": "RAMIRO",
-      "fullName": "Ramiro",
+      "fullName": "Ramiro Reyna",
       "branch": "carlos",
       "generation": 4,
       "gender": "M",
@@ -480,7 +519,7 @@
     {
       "id": "rosario_c",
       "name": "ROSARIO",
-      "fullName": "Rosario",
+      "fullName": "Rosario Reyna",
       "branch": "carlos",
       "generation": 4,
       "gender": "F",
@@ -491,7 +530,7 @@
     {
       "id": "consuelo_c",
       "name": "CONSUELO",
-      "fullName": "Consuelo",
+      "fullName": "Consuelo Reyna",
       "branch": "carlos",
       "generation": 3,
       "gender": "F",
@@ -537,7 +576,7 @@
     {
       "id": "patricia_j",
       "name": "PATRICIA",
-      "fullName": "Patricia",
+      "fullName": "Patricia Reyna",
       "branch": "jorge",
       "generation": 3,
       "gender": "F",
@@ -549,7 +588,7 @@
     {
       "id": "javier_j",
       "name": "JAVIER",
-      "fullName": "Javier",
+      "fullName": "Javier Salomone",
       "branch": "jorge",
       "generation": 3,
       "gender": "M",
@@ -560,7 +599,7 @@
     {
       "id": "josefina_j",
       "name": "JOSEFINA",
-      "fullName": "Josefina",
+      "fullName": "Josefina Salomone Reyna",
       "branch": "jorge",
       "generation": 4,
       "gender": "F",
@@ -571,7 +610,7 @@
     {
       "id": "felipe_j",
       "name": "FELIPE",
-      "fullName": "Felipe",
+      "fullName": "Felipe Salomone Reyna",
       "branch": "jorge",
       "generation": 4,
       "gender": "M",
@@ -582,7 +621,7 @@
     {
       "id": "alejandra_j",
       "name": "ALEJANDRA",
-      "fullName": "Alejandra",
+      "fullName": "Alejandra Reyna",
       "branch": "jorge",
       "generation": 3,
       "gender": "F",
@@ -594,7 +633,7 @@
     {
       "id": "matias_j",
       "name": "MATÍAS",
-      "fullName": "Matías",
+      "fullName": "Matías Amaya",
       "branch": "jorge",
       "generation": 3,
       "gender": "M",
@@ -605,7 +644,7 @@
     {
       "id": "pedro_j",
       "name": "PEDRO",
-      "fullName": "Pedro",
+      "fullName": "Pedro Amaya Reyna",
       "branch": "jorge",
       "generation": 4,
       "gender": "M",
@@ -616,7 +655,7 @@
     {
       "id": "tomas_j",
       "name": "TOMÁS",
-      "fullName": "Tomás",
+      "fullName": "Tomás Amaya Reyna",
       "branch": "jorge",
       "generation": 4,
       "gender": "M",
@@ -627,7 +666,7 @@
     {
       "id": "santiago_j",
       "name": "SANTIAGO",
-      "fullName": "Santiago",
+      "fullName": "Santiago Amaya Reyna",
       "branch": "jorge",
       "generation": 4,
       "gender": "M",
@@ -638,7 +677,7 @@
     {
       "id": "amalia_j",
       "name": "AMALIA",
-      "fullName": "Amalia",
+      "fullName": "Amalia Reyna",
       "branch": "jorge",
       "generation": 3,
       "gender": "F",
@@ -661,7 +700,7 @@
     {
       "id": "jorge_ml",
       "name": "JORGE",
-      "fullName": "Jorge",
+      "fullName": "Jorge Pérez Sever",
       "branch": "marialaura",
       "generation": 2,
       "gender": "M",
@@ -672,7 +711,7 @@
     {
       "id": "federico_ml",
       "name": "FEDERICO",
-      "fullName": "Federico",
+      "fullName": "Federico Pérez Reyna",
       "branch": "marialaura",
       "generation": 3,
       "gender": "M",
@@ -695,7 +734,7 @@
     {
       "id": "catalina_ml",
       "name": "CATALINA",
-      "fullName": "Catalina",
+      "fullName": "Catalina Pérez",
       "branch": "marialaura",
       "generation": 4,
       "gender": "F",
@@ -706,7 +745,7 @@
     {
       "id": "benjamin_ml",
       "name": "BENJAMÍN",
-      "fullName": "Benjamín",
+      "fullName": "Benjamín Pérez",
       "branch": "marialaura",
       "generation": 4,
       "gender": "M",
@@ -717,7 +756,7 @@
     {
       "id": "laura_ml",
       "name": "LAURA",
-      "fullName": "Laura",
+      "fullName": "Laura Pérez Reyna",
       "branch": "marialaura",
       "generation": 3,
       "gender": "F",
@@ -728,7 +767,7 @@
     {
       "id": "inigo_ml",
       "name": "IÑIGO",
-      "fullName": "Iñigo",
+      "fullName": "Iñigo Pérez",
       "branch": "marialaura",
       "generation": 4,
       "gender": "M",
@@ -739,7 +778,7 @@
     {
       "id": "helena_ml",
       "name": "HELENA",
-      "fullName": "Helena",
+      "fullName": "Helena Pérez",
       "branch": "marialaura",
       "generation": 4,
       "gender": "F",
@@ -762,7 +801,7 @@
     {
       "id": "ernesto_cec",
       "name": "ERNESTO",
-      "fullName": "Ernesto",
+      "fullName": "Ernesto de Cabrera",
       "branch": "cecilia",
       "generation": 2,
       "gender": "M",
@@ -773,7 +812,7 @@
     {
       "id": "carlos_patricio_cec",
       "name": "CARLOS PATRICIO",
-      "fullName": "Carlos Patricio",
+      "fullName": "Carlos Patricio de Cabrera Reyna",
       "branch": "cecilia",
       "generation": 3,
       "gender": "M",
@@ -796,7 +835,7 @@
     {
       "id": "ludmila_cec",
       "name": "LUDMILA",
-      "fullName": "Ludmila",
+      "fullName": "Ludmila de Cabrera",
       "branch": "cecilia",
       "generation": 4,
       "gender": "F",
@@ -807,7 +846,7 @@
     {
       "id": "alicia_cec",
       "name": "ALICIA",
-      "fullName": "Alicia",
+      "fullName": "Alicia de Cabrera",
       "branch": "cecilia",
       "generation": 4,
       "gender": "F",
@@ -818,7 +857,7 @@
     {
       "id": "rodrigo_cec",
       "name": "RODRIGO",
-      "fullName": "Rodrigo",
+      "fullName": "Rodrigo de Cabrera",
       "branch": "cecilia",
       "generation": 4,
       "gender": "M",
@@ -829,7 +868,7 @@
     {
       "id": "soledad_cec",
       "name": "SOLEDAD",
-      "fullName": "Soledad",
+      "fullName": "Soledad de Cabrera Reyna",
       "branch": "cecilia",
       "generation": 3,
       "gender": "F",
@@ -852,7 +891,7 @@
     {
       "id": "cecilia_sol_cec",
       "name": "CECILIA",
-      "fullName": "Cecilia",
+      "fullName": "Cecilia de Cabrera",
       "branch": "cecilia",
       "generation": 4,
       "gender": "F",
@@ -875,7 +914,7 @@
     {
       "id": "nicolas_cec",
       "name": "NICOLÁS",
-      "fullName": "Nicolás",
+      "fullName": "Nicolás de Cabrera",
       "branch": "cecilia",
       "generation": 4,
       "gender": "M",
@@ -898,7 +937,7 @@
     {
       "id": "santino_cec",
       "name": "SANTINO",
-      "fullName": "Santino",
+      "fullName": "Santino de Cabrera",
       "branch": "cecilia",
       "generation": 5,
       "gender": "M",
@@ -909,7 +948,7 @@
     {
       "id": "emiliano_ernesto_cec",
       "name": "ERNESTO",
-      "fullName": "Ernesto",
+      "fullName": "Ernesto de Cabrera",
       "branch": "cecilia",
       "generation": 5,
       "gender": "M",
@@ -920,7 +959,7 @@
     {
       "id": "nazareno_cec",
       "name": "NAZARENO",
-      "fullName": "Nazareno",
+      "fullName": "Nazareno de Cabrera",
       "branch": "cecilia",
       "generation": 4,
       "gender": "M",
@@ -943,7 +982,7 @@
     {
       "id": "carlos_adr",
       "name": "CARLOS",
-      "fullName": "Carlos",
+      "fullName": "Carlos Bourtolusi",
       "branch": "adriana",
       "generation": 2,
       "gender": "M",
@@ -954,7 +993,7 @@
     {
       "id": "carlos_hijo_adr",
       "name": "CARLOS",
-      "fullName": "Carlos",
+      "fullName": "Carlos Bourtolusi Reyna",
       "branch": "adriana",
       "generation": 3,
       "gender": "M",
@@ -977,7 +1016,7 @@
     {
       "id": "manuel_adr",
       "name": "MANUEL",
-      "fullName": "Manuel",
+      "fullName": "Manuel Bourtolusi",
       "branch": "adriana",
       "generation": 4,
       "gender": "M",
@@ -988,7 +1027,7 @@
     {
       "id": "bartolome_adr",
       "name": "BARTOLOMÉ",
-      "fullName": "Bartolomé",
+      "fullName": "Bartolomé Bourtolusi",
       "branch": "adriana",
       "generation": 4,
       "gender": "M",
@@ -999,7 +1038,7 @@
     {
       "id": "antonio_adr",
       "name": "ANTONIO",
-      "fullName": "Antonio",
+      "fullName": "Antonio Bourtolusi",
       "branch": "adriana",
       "generation": 4,
       "gender": "M",
@@ -1010,7 +1049,7 @@
     {
       "id": "paula_adr",
       "name": "PAULA",
-      "fullName": "Paula",
+      "fullName": "Paula Bourtolusi Reyna",
       "branch": "adriana",
       "generation": 3,
       "gender": "F",
@@ -1033,7 +1072,7 @@
     {
       "id": "lorenzo_adr",
       "name": "LORENZO",
-      "fullName": "Lorenzo",
+      "fullName": "Lorenzo Bourtolusi",
       "branch": "adriana",
       "generation": 4,
       "gender": "M",
@@ -1044,7 +1083,7 @@
     {
       "id": "blanca_adr",
       "name": "BLANCA",
-      "fullName": "Blanca",
+      "fullName": "Blanca Bourtolusi",
       "branch": "adriana",
       "generation": 4,
       "gender": "F",
@@ -1055,7 +1094,7 @@
     {
       "id": "agustin_adr",
       "name": "AGUSTÍN",
-      "fullName": "Agustín",
+      "fullName": "Agustín Bourtolusi Reyna",
       "branch": "adriana",
       "generation": 3,
       "gender": "M",
@@ -1089,7 +1128,7 @@
     {
       "id": "ines_fer",
       "name": "INÉS",
-      "fullName": "Inés",
+      "fullName": "Inés Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "F",
@@ -1112,7 +1151,7 @@
     {
       "id": "cecilia_fer",
       "name": "CECILIA",
-      "fullName": "Cecilia",
+      "fullName": "Cecilia Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "F",
@@ -1135,7 +1174,7 @@
     {
       "id": "leon_fer",
       "name": "LEÓN",
-      "fullName": "León",
+      "fullName": "León Reyna",
       "branch": "fernando",
       "generation": 4,
       "gender": "M",
@@ -1146,7 +1185,7 @@
     {
       "id": "lucia_fer",
       "name": "LUCÍA",
-      "fullName": "Lucía",
+      "fullName": "Lucía Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "F",
@@ -1169,7 +1208,7 @@
     {
       "id": "francisco_luc_fer",
       "name": "FRANCISCO",
-      "fullName": "Francisco",
+      "fullName": "Francisco Reyna",
       "branch": "fernando",
       "generation": 4,
       "gender": "M",
@@ -1180,7 +1219,7 @@
     {
       "id": "felipe_luc_fer",
       "name": "FELIPE",
-      "fullName": "Felipe",
+      "fullName": "Felipe Reyna",
       "branch": "fernando",
       "generation": 4,
       "gender": "M",
@@ -1191,7 +1230,7 @@
     {
       "id": "martin_fer",
       "name": "MARTÍN",
-      "fullName": "Martín",
+      "fullName": "Martín Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "M",
@@ -1202,7 +1241,7 @@
     {
       "id": "juan_ignacio_fer",
       "name": "JUAN IGNACIO",
-      "fullName": "Juan Ignacio",
+      "fullName": "Juan Ignacio Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "M",
@@ -1213,7 +1252,7 @@
     {
       "id": "gonzalo_fer",
       "name": "GONZALO",
-      "fullName": "Gonzalo",
+      "fullName": "Gonzalo Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "M",
@@ -1224,7 +1263,7 @@
     {
       "id": "santiago_fer",
       "name": "SANTIAGO",
-      "fullName": "Santiago",
+      "fullName": "Santiago Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "M",
@@ -1247,7 +1286,7 @@
     {
       "id": "belen_fer",
       "name": "BELÉN",
-      "fullName": "Belén",
+      "fullName": "Belén Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "F",
@@ -1270,7 +1309,7 @@
     {
       "id": "hernan_fer",
       "name": "HERNÁN",
-      "fullName": "Hernán",
+      "fullName": "Hernán Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "M",
@@ -1281,7 +1320,7 @@
     {
       "id": "mariana_fer",
       "name": "MARIANA",
-      "fullName": "Mariana",
+      "fullName": "Mariana Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "F",
@@ -1304,7 +1343,7 @@
     {
       "id": "victoria_fer",
       "name": "VICTORIA",
-      "fullName": "Victoria",
+      "fullName": "Victoria Reyna",
       "branch": "fernando",
       "generation": 3,
       "gender": "F",
@@ -1340,7 +1379,7 @@
     {
       "id": "roberto_isa",
       "name": "ROBERTO",
-      "fullName": "Roberto",
+      "fullName": "Roberto Nietzsche",
       "branch": "isabel",
       "generation": 2,
       "gender": "M",
@@ -1351,7 +1390,7 @@
     {
       "id": "bernardo_isa",
       "name": "BERNARDO",
-      "fullName": "Bernardo",
+      "fullName": "Bernardo Nietzsche Reyna",
       "branch": "isabel",
       "generation": 3,
       "gender": "M",
@@ -1362,8 +1401,8 @@
     },
     {
       "id": "marcela_isa",
-      "name": "MARCELA",
-      "fullName": "Marcela",
+      "name": "NATALIA",
+      "fullName": "Natalia de la Sota",
       "branch": "isabel",
       "generation": 3,
       "gender": "F",
@@ -1374,7 +1413,7 @@
     {
       "id": "mia_isa",
       "name": "MIA",
-      "fullName": "Mia",
+      "fullName": "Mia Nietzsche de la Sota",
       "branch": "isabel",
       "generation": 4,
       "gender": "F",
@@ -1385,7 +1424,7 @@
     {
       "id": "clara_isa",
       "name": "CLARA",
-      "fullName": "Clara",
+      "fullName": "Clara Nietzsche Reyna",
       "branch": "isabel",
       "generation": 3,
       "gender": "F",
@@ -1431,7 +1470,7 @@
     {
       "id": "juan_ignacio_eug",
       "name": "JUAN IGNACIO",
-      "fullName": "Juan Ignacio",
+      "fullName": "Juan Ignacio Reyna",
       "branch": "eugenio",
       "generation": 3,
       "gender": "M",
@@ -1454,7 +1493,7 @@
     {
       "id": "lucas_eug",
       "name": "LUCAS",
-      "fullName": "Lucas",
+      "fullName": "Lucas Reyna",
       "branch": "eugenio",
       "generation": 4,
       "gender": "M",
@@ -1465,7 +1504,7 @@
     {
       "id": "carlos_alberto_hijo_eug",
       "name": "CARLOS ALBERTO",
-      "fullName": "Carlos Alberto",
+      "fullName": "Carlos Alberto Reyna",
       "branch": "eugenio",
       "generation": 3,
       "gender": "M",
@@ -1488,7 +1527,7 @@
     {
       "id": "constanza_eug",
       "name": "CONSTANZA",
-      "fullName": "Constanza",
+      "fullName": "Constanza Reyna",
       "branch": "eugenio",
       "generation": 4,
       "gender": "F",
@@ -1499,7 +1538,7 @@
     {
       "id": "tiziano_eug",
       "name": "TIZIANO",
-      "fullName": "Tiziano",
+      "fullName": "Tiziano Reyna",
       "branch": "eugenio",
       "generation": 4,
       "gender": "M",
@@ -1510,7 +1549,7 @@
     {
       "id": "maria_cecilia_eug",
       "name": "MARÍA CECILIA",
-      "fullName": "María Cecilia",
+      "fullName": "María Cecilia Reyna",
       "branch": "eugenio",
       "generation": 4,
       "gender": "F",
@@ -1521,7 +1560,7 @@
     {
       "id": "eugenia_eug",
       "name": "EUGENIA",
-      "fullName": "Eugenia",
+      "fullName": "Eugenia Reyna",
       "branch": "eugenio",
       "generation": 3,
       "gender": "F",
@@ -1544,7 +1583,7 @@
     {
       "id": "mateo_eug",
       "name": "MATEO",
-      "fullName": "Mateo",
+      "fullName": "Mateo Reyna",
       "branch": "eugenio",
       "generation": 4,
       "gender": "M",
@@ -1555,7 +1594,7 @@
     {
       "id": "valen_eug",
       "name": "VALEN",
-      "fullName": "Valen",
+      "fullName": "Valen Reyna",
       "branch": "eugenio",
       "generation": 3,
       "gender": "M",
@@ -1566,7 +1605,7 @@
     {
       "id": "agustin_eug",
       "name": "AGUSTÍN",
-      "fullName": "Agustín",
+      "fullName": "Agustín Reyna",
       "branch": "eugenio",
       "generation": 3,
       "gender": "M",
@@ -1589,7 +1628,7 @@
     {
       "id": "maria_laura_fran",
       "name": "MARÍA LAURA",
-      "fullName": "María Laura",
+      "fullName": "María Laura Pueyrredón",
       "branch": "francisco",
       "generation": 2,
       "gender": "F",
@@ -1600,7 +1639,7 @@
     {
       "id": "marcos_fran",
       "name": "MARCOS",
-      "fullName": "Marcos",
+      "fullName": "Marcos Reyna Pueyrredón",
       "branch": "francisco",
       "generation": 3,
       "gender": "M",
@@ -1623,7 +1662,7 @@
     {
       "id": "maria_emilia_fran",
       "name": "MARÍA EMILIA",
-      "fullName": "María Emilia",
+      "fullName": "María Emilia Reyna",
       "branch": "francisco",
       "generation": 4,
       "gender": "F",
@@ -1634,7 +1673,7 @@
     {
       "id": "felipe_marcos_fran",
       "name": "FELIPE",
-      "fullName": "Felipe",
+      "fullName": "Felipe Reyna",
       "branch": "francisco",
       "generation": 4,
       "gender": "M",
@@ -1645,7 +1684,7 @@
     {
       "id": "francisco_hijo_fran",
       "name": "FRANCISCO",
-      "fullName": "Francisco",
+      "fullName": "Francisco Reyna Pueyrredón",
       "branch": "francisco",
       "generation": 3,
       "gender": "M",
@@ -1668,7 +1707,7 @@
     {
       "id": "tomas_fran",
       "name": "TOMÁS",
-      "fullName": "Tomás",
+      "fullName": "Tomás Reyna",
       "branch": "francisco",
       "generation": 4,
       "gender": "M",
@@ -1679,7 +1718,7 @@
     {
       "id": "roque_fran",
       "name": "ROQUE",
-      "fullName": "Roque",
+      "fullName": "Roque Reyna",
       "branch": "francisco",
       "generation": 4,
       "gender": "M",
@@ -1690,7 +1729,7 @@
     {
       "id": "juan_cruz_fran",
       "name": "JUAN CRUZ",
-      "fullName": "Juan Cruz",
+      "fullName": "Juan Cruz Reyna Pueyrredón",
       "branch": "francisco",
       "generation": 3,
       "gender": "M",
@@ -1713,7 +1752,7 @@
     {
       "id": "maria_carmen_fran",
       "name": "MARÍA DEL CARMEN",
-      "fullName": "María del Carmen",
+      "fullName": "María del Carmen Reyna",
       "branch": "francisco",
       "generation": 4,
       "gender": "F",
