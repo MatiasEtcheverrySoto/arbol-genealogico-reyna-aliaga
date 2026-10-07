@@ -966,22 +966,24 @@
     card.appendChild(nameEl);
 
     // Surnames / Apellidos (heredados del padre y de la madre)
+    const surnameEl = document.createElement('div');
+    surnameEl.className = 'card-surnames';
+    let surnames = '';
     if (member.fullName && member.fullName.trim()) {
       const nameParts = member.name.trim().split(/\s+/);
       const fullParts = member.fullName.trim().split(/\s+/);
-      let surnames = '';
       if (fullParts.length > nameParts.length) {
         surnames = fullParts.slice(nameParts.length).join(' ');
       } else if (fullParts.length > 1 && !member.name.includes(' ')) {
         surnames = fullParts.slice(1).join(' ');
       }
-      if (surnames) {
-        const surnameEl = document.createElement('div');
-        surnameEl.className = 'card-surnames';
-        surnameEl.textContent = surnames;
-        card.appendChild(surnameEl);
-      }
     }
+    if (surnames) {
+      surnameEl.textContent = surnames;
+    } else {
+      surnameEl.innerHTML = '&nbsp;';
+    }
+    card.appendChild(surnameEl);
 
     // Role / Generation
     if (!isCompact || member.badge) {

@@ -724,7 +724,7 @@ body.theme-dark .patriarch-banner-title {
 
 .patriarch-couples-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 1.5rem;
   position: relative;
 }
@@ -781,7 +781,7 @@ body.theme-dark .branch-column {
 .subgroup-couples {
   display: flex;
   gap: 1.2rem;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .branch-column.vertical-tall .subgroup-couples {
@@ -794,6 +794,8 @@ body.theme-dark .branch-column {
    ========================================================================== */
 .member-card {
   width: 170px;
+  min-height: 160px;
+  box-sizing: border-box;
   background: var(--bg-card);
   border-radius: 12px;
   border: 1.5px solid var(--border-color);
@@ -801,6 +803,7 @@ body.theme-dark .branch-column {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   position: relative;
   box-shadow: var(--shadow-card);
   cursor: pointer;
@@ -892,8 +895,13 @@ body.theme-dark .branch-column {
   text-align: center;
   line-height: 1.15;
   color: var(--text-main);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
   letter-spacing: 0.3px;
+  min-height: 2.3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .card-surnames {
@@ -902,10 +910,15 @@ body.theme-dark .branch-column {
   color: var(--card-branch-color, var(--accent-burgundy));
   opacity: 0.88;
   text-align: center;
-  line-height: 1.15;
+  line-height: 1.2;
   margin-top: -0.05rem;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
   letter-spacing: 0.2px;
+  min-height: 1.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .card-role {
@@ -913,6 +926,12 @@ body.theme-dark .branch-column {
   color: var(--text-muted);
   text-align: center;
   font-weight: 500;
+  margin-top: auto;
+  min-height: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .card-special-badge {
@@ -949,7 +968,7 @@ body.theme-dark .card-special-badge {
   display: flex;
   gap: 0.4rem;
   position: relative;
-  align-items: center;
+  align-items: stretch;
 }
 
 .couple-heart {
@@ -971,7 +990,7 @@ body.theme-dark .card-special-badge {
 .children-row {
   display: flex;
   gap: 0.5rem;
-  align-items: flex-start;
+  align-items: stretch;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -979,20 +998,36 @@ body.theme-dark .card-special-badge {
 /* Compact Children Cards */
 .member-card.compact {
   width: 135px;
+  min-height: 134px;
+  box-sizing: border-box;
   padding: 0.45rem;
+  justify-content: flex-start;
 }
 
 .member-card.compact .card-avatar-wrap {
   width: 44px;
   height: 44px;
+  margin-bottom: 0.35rem;
 }
 
 .member-card.compact .card-name {
   font-size: 0.76rem;
+  min-height: 2.1em;
+  line-height: 1.15;
+  margin-bottom: 0.15rem;
+}
+
+.member-card.compact .card-surnames {
+  font-size: 0.64rem;
+  min-height: 1.2em;
+  line-height: 1.15;
+  margin-bottom: 0.2rem;
 }
 
 .member-card.compact .card-role {
   font-size: 0.62rem;
+  min-height: 1.1em;
+  margin-top: auto;
 }
 
 /* ==========================================================================
