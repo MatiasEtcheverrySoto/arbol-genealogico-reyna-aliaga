@@ -58,8 +58,7 @@
   const modalBranchTag = document.getElementById('modalBranchTag');
   const modalPhotoPreview = document.getElementById('modalPhotoPreview');
   const memberPhotoFileInput = document.getElementById('memberPhotoFileInput');
-  const memberPhotoUrlInput = document.getElementById('memberPhotoUrlInput');
-  const loadUrlPhotoBtn = document.getElementById('loadUrlPhotoBtn');
+  const pasteClipboardPhotoBtn = document.getElementById('pasteClipboardPhotoBtn');
   const removePhotoBtn = document.getElementById('removePhotoBtn');
   const modalQuickActions = document.getElementById('modalQuickActions');
   const modalAddChildBtn = document.getElementById('modalAddChildBtn');
@@ -418,6 +417,32 @@
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  function getMemberDisplayRole(member) {
+    if (!member) return '';
+    let role = member.role;
+    if (!role || role === 'Integrante') {
+      if (member.generation === 1) {
+        role = member.gender === 'F' ? 'Matriarca' : 'Patriarca';
+      } else if (member.generation === 2) {
+        role = member.gender === 'F' ? 'Hija' : 'Hijo';
+      } else if (member.generation === 3) {
+        role = member.gender === 'F' ? 'Nieta' : 'Nieto';
+      } else if (member.generation === 4) {
+        role = member.gender === 'F' ? 'Bisnieta' : 'Bisnieto';
+      } else if (member.generation === 5) {
+        role = member.gender === 'F' ? 'Tataranieta' : 'Tataranieto';
+      } else if (member.generation) {
+        role = `Gen ${member.generation}`;
+      }
+    } else if (member.gender === 'F') {
+      if (role === 'Bisnieto') role = 'Bisnieta';
+      else if (role === 'Tataranieto') role = 'Tataranieta';
+      else if (role === 'Nieto') role = 'Nieta';
+      else if (role === 'Hijo') role = 'Hija';
+    }
+    return role || '';
+  }
+
   // --- EVENT BINDING ---
   function bindEvents() {
     // Canvas Pan & Zoom
@@ -528,11 +553,6 @@
     saveMemberBtn.addEventListener('click', saveModalMember);
     deleteMemberBtn.addEventListener('click', confirmDeleteMember);
 
-    const btnMoveOlder = document.getElementById('btnMoveOlder');
-    if (btnMoveOlder) btnMoveOlder.addEventListener('click', () => moveMemberRelative(-1));
-    const btnMoveYounger = document.getElementById('btnMoveYounger');
-    if (btnMoveYounger) btnMoveYounger.addEventListener('click', () => moveMemberRelative(1));
-
     const formBirthYearInput = document.getElementById('formBirthYear');
     if (formBirthYearInput) {
       formBirthYearInput.addEventListener('input', () => {
@@ -541,21 +561,6 @@
           if (m) {
             const rawVal = formBirthYearInput.value.trim();
             m.birthYear = rawVal ? parseInt(rawVal, 10) : null;
-            renderModalSiblingOrder(m);
-          }
-        }
-      });
-    }
-
-    const formOrderInput = document.getElementById('formOrder');
-    if (formOrderInput) {
-      formOrderInput.addEventListener('input', () => {
-        if (activeMemberId) {
-          const m = getMember(activeMemberId);
-          if (m) {
-            const rawVal = formOrderInput.value.trim();
-            m.order = rawVal ? parseFloat(rawVal) : null;
-            renderModalSiblingOrder(m);
           }
         }
       });
@@ -576,33 +581,39 @@
         if (pId) {
           const parent = getMember(pId);
           if (parent) {
-            document.getElementById('formBranch').value = parent.branch;
             const nextGen = Math.min(5, (parent.generation || 2) + 1);
-            document.getElementById('formGeneration').value = nextGen;
+            const genRoleSelect = document.getElementById('formGenerationRole');
+            if (genRoleSelect && !activeMemberId) {
+              genRoleSelect.value = String(nextGen);
+            }
             const br = getBranch(parent.branch);
             modalBranchTag.textContent = br.name;
             modalBranchTag.style.backgroundColor = br.color;
-            const roleEl = document.getElementById('formRole');
-            if (roleEl && (!roleEl.value || roleEl.value === 'Nuevo integrante' || roleEl.value === 'Integrante')) {
-              roleEl.value = nextGen === 3 ? 'Nieto' : (nextGen === 4 ? 'Bisnieto' : 'Tataranieto');
-            }
-            // Auto order for newly added member
-            const siblings = familyData.members.filter(c => c.parentId === pId && !c.role?.includes('Cónyuge'));
-            const formOrderEl = document.getElementById('formOrder');
-            if (formOrderEl && !activeMemberId) {
-              formOrderEl.value = siblings.length + 1;
-            }
           }
         }
       });
     }
 
-    const formBranchInput = document.getElementById('formBranch');
-    if (formBranchInput) {
-      formBranchInput.addEventListener('change', (e) => {
-        const br = getBranch(e.target.value);
-        modalBranchTag.textContent = br.name;
-        modalBranchTag.style.backgroundColor = br.color;
+    const formSpouseInput = document.getElementById('formSpouse');
+    if (formSpouseInput) {
+      formSpouseInput.addEventListener('change', (e) => {
+        const sId = e.target.value;
+        if (sId) {
+          const spouse = getMember(sId);
+          if (spouse) {
+            const pId = document.getElementById('formParent').value;
+            if (!pId) {
+              const br = getBranch(spouse.branch);
+              modalBranchTag.textContent = br.name;
+              modalBranchTag.style.backgroundColor = br.color;
+            }
+            const genRoleSelect = document.getElementById('formGenerationRole');
+            if (genRoleSelect && !activeMemberId) {
+              const spouseGen = spouse.generation || 3;
+              genRoleSelect.value = `${spouseGen}_conyuge`;
+            }
+          }
+        }
       });
     }
 
@@ -640,7 +651,11 @@
         memberPhotoFileInput.click();
       });
     }
-    loadUrlPhotoBtn.addEventListener('click', handlePhotoUrlLoad);
+    if (pasteClipboardPhotoBtn) {
+      pasteClipboardPhotoBtn.addEventListener('click', pasteImageFromClipboard);
+    }
+    window.addEventListener('paste', handleGlobalPaste);
+
     removePhotoBtn.addEventListener('click', () => {
       currentModalPhoto = null;
       renderModalPhotoPreview(null, modalMemberName.textContent);
@@ -922,77 +937,11 @@
   }
 
   function renderModalSiblingOrder(member) {
-    const box = document.getElementById('modalSiblingOrderBox');
-    const listEl = document.getElementById('modalSiblingList');
-    const btnOlder = document.getElementById('btnMoveOlder');
-    const btnYounger = document.getElementById('btnMoveYounger');
-    if (!box || !listEl || !btnOlder || !btnYounger) return;
-
-    if (!member || !member.id) {
-      box.style.display = 'none';
-      return;
-    }
-
-    const peers = getSiblingPeers(member);
-    if (peers.length <= 1) {
-      box.style.display = 'none';
-      return;
-    }
-
-    box.style.display = 'flex';
-    const sortedPeers = sortMembersByAge(peers);
-    const currentIndex = sortedPeers.findIndex(p => p.id === member.id);
-
-    listEl.innerHTML = '';
-    sortedPeers.forEach((p, idx) => {
-      const chip = document.createElement('div');
-      chip.className = `sibling-chip ${p.id === member.id ? 'active' : ''}`;
-      const yearStr = p.birthYear ? ` (${p.birthYear})` : '';
-      chip.textContent = `${idx + 1}. ${p.name}${yearStr}`;
-      listEl.appendChild(chip);
-    });
-
-    btnOlder.disabled = (currentIndex <= 0);
-    btnYounger.disabled = (currentIndex === -1 || currentIndex >= sortedPeers.length - 1);
+    // Sibling order section removed per user request (ordering is determined by birth year)
   }
 
   function moveMemberRelative(direction) {
-    if (!activeMemberId) return;
-    const member = getMember(activeMemberId);
-    if (!member) return;
-
-    const peers = getSiblingPeers(member);
-    if (peers.length <= 1) return;
-
-    const sortedPeers = sortMembersByAge(peers);
-    const currentIndex = sortedPeers.findIndex(p => p.id === member.id);
-    const targetIndex = currentIndex + direction;
-
-    if (targetIndex < 0 || targetIndex >= sortedPeers.length) return;
-
-    sortedPeers.forEach((p, i) => {
-      p.order = i + 1;
-    });
-
-    const targetMember = sortedPeers[targetIndex];
-    const tempOrder = member.order;
-    member.order = targetMember.order;
-    targetMember.order = tempOrder;
-
-    const formOrderEl = document.getElementById('formOrder');
-    if (formOrderEl) formOrderEl.value = member.order;
-
-    saveData();
-    saveMemberToCloud(member);
-    saveMemberToCloud(targetMember);
-
-    renderModalSiblingOrder(member);
-    renderAll();
-
-    const relationMsg = direction < 0 
-      ? `⬆️ ${member.name} ahora está ordenado antes de ${targetMember.name} (mayor).`
-      : `⬇️ ${member.name} ahora está ordenado después de ${targetMember.name} (menor).`;
-    showToast(relationMsg);
+    // Sibling order manual movement removed per user request
   }
 
   function renderStandardBranchDescendants(container, branchId) {
@@ -1191,18 +1140,10 @@
     // Role / Generation / BirthYear
     const roleEl = document.createElement('div');
     roleEl.className = 'card-role';
-    let roleText = '';
-    if (!isCompact) {
-      roleText = member.role || `Gen ${member.generation}`;
-      if (member.birthYear) {
-        roleText += ` • ${member.birthYear}`;
-      }
-    } else {
-      if (member.birthYear) {
-        roleText = `${member.birthYear}`;
-      } else if (member.role && member.role !== 'Hijo/a' && member.role !== 'Bisnieto') {
-        roleText = member.role;
-      }
+    const displayRole = getMemberDisplayRole(member);
+    let roleText = displayRole || (member.generation ? `Gen ${member.generation}` : '');
+    if (member.birthYear) {
+      roleText = roleText ? `${roleText} • ${member.birthYear}` : `${member.birthYear}`;
     }
     if (roleText) {
       roleEl.textContent = roleText;
@@ -1418,7 +1359,7 @@
           </span>
         </td>
         <td>Gen ${m.generation}</td>
-        <td>${m.role || '-'} ${m.badge ? `<span class="card-special-badge">${m.badge}</span>` : ''}</td>
+        <td>${getMemberDisplayRole(m) || '-'} ${m.badge ? `<span class="card-special-badge">${m.badge}</span>` : ''}</td>
         <td>${spouseName}</td>
         <td>
           <button class="btn small secondary edit-table-btn" data-id="${m.id}">
@@ -1544,7 +1485,7 @@
             : `<div class="search-result-avatar" style="background-color: ${branch.color}">${getInitials(m.name)}</div>`}
           <div class="search-result-info">
             <div class="search-result-name">${m.fullName || m.name} ${m.badge ? `(${m.badge})` : ''}</div>
-            <div class="search-result-sub">${branch.name} • Gen ${m.generation} • ${m.role || ''}</div>
+            <div class="search-result-sub">${branch.name} • Gen ${m.generation} • ${getMemberDisplayRole(m)}</div>
           </div>
         `;
 
@@ -1600,20 +1541,25 @@
     document.getElementById('formMemberId').value = member.id;
     document.getElementById('formName').value = member.name;
     document.getElementById('formFullName').value = member.fullName || '';
-    document.getElementById('formBranch').value = member.branch;
-    document.getElementById('formGeneration').value = member.generation;
-    document.getElementById('formRole').value = member.role || '';
-    document.getElementById('formBadge').value = member.badge || '';
     document.getElementById('formGender').value = member.gender || 'M';
+
+    // Generación y Rol unificados
+    const genRoleSelect = document.getElementById('formGenerationRole');
+    if (genRoleSelect) {
+      const isConyuge = member.role && member.role.includes('Cónyuge');
+      const val = isConyuge ? `${member.generation}_conyuge` : `${member.generation}`;
+      if (genRoleSelect.querySelector(`option[value="${val}"]`)) {
+        genRoleSelect.value = val;
+      } else {
+        genRoleSelect.value = String(member.generation || 3);
+      }
+    }
+
     document.getElementById('formBirthYear').value = member.birthYear || '';
-    document.getElementById('formOrder').value = (member.order !== undefined && member.order !== null) ? member.order : '';
-    document.getElementById('formNotes').value = member.notes || '';
+    document.getElementById('formNotes').value = member.notes || (member.badge ? (`Distinción: ${member.badge}`) : '');
 
     // Populate Parent & Spouse selects
     populateSpouseAndParentSelects(member);
-
-    // Sibling / Peer ordering box
-    renderModalSiblingOrder(member);
 
     // Photo preview
     renderModalPhotoPreview(currentModalPhoto, member.name);
@@ -1790,7 +1736,7 @@
         branchColor: br.color,
         generation: m.generation,
         role: m.role,
-        displayName: `${m.fullName || m.name} (${br.name})`
+        displayName: m.fullName || m.name
       });
 
       parentOptions.push({
@@ -1802,7 +1748,7 @@
         branchColor: br.color,
         generation: m.generation,
         role: m.role,
-        displayName: `${m.fullName || m.name} (${br.name} - Gen ${m.generation})`
+        displayName: m.fullName || m.name
       });
     });
 
@@ -1813,7 +1759,25 @@
       clearBtnId: 'spouseClearBtn',
       placeholderNone: '(Ninguno / Soltero)',
       options: spouseOptions,
-      selectedId: currentMember.spouseId || null
+      selectedId: currentMember.spouseId || null,
+      onSelect: (opt) => {
+        if (opt) {
+          const spouse = familyData.members.find(m => m.id === opt.id);
+          if (spouse) {
+            const parentId = document.getElementById('formParent').value;
+            if (!parentId) {
+              const br = getBranch(spouse.branch);
+              modalBranchTag.textContent = br.name;
+              modalBranchTag.style.backgroundColor = br.color;
+            }
+            const genRoleSelect = document.getElementById('formGenerationRole');
+            if (genRoleSelect && !activeMemberId) {
+              const spouseGen = spouse.generation || 3;
+              genRoleSelect.value = `${spouseGen}_conyuge`;
+            }
+          }
+        }
+      }
     });
 
     setupSearchableCombobox({
@@ -1828,21 +1792,14 @@
         if (opt) {
           const parent = familyData.members.find(m => m.id === opt.id);
           if (parent) {
-            document.getElementById('formBranch').value = parent.branch;
             const nextGen = Math.min(5, (parent.generation || 2) + 1);
-            document.getElementById('formGeneration').value = nextGen;
+            const genRoleSelect = document.getElementById('formGenerationRole');
+            if (genRoleSelect && !activeMemberId) {
+              genRoleSelect.value = String(nextGen);
+            }
             const br = getBranch(parent.branch);
             modalBranchTag.textContent = br.name;
             modalBranchTag.style.backgroundColor = br.color;
-            const roleEl = document.getElementById('formRole');
-            if (roleEl && (!roleEl.value || roleEl.value === 'Nuevo integrante' || roleEl.value === 'Integrante')) {
-              roleEl.value = nextGen === 3 ? 'Nieto' : (nextGen === 4 ? 'Bisnieto' : 'Tataranieto');
-            }
-            const siblings = familyData.members.filter(c => c.parentId === parent.id && !c.role?.includes('Cónyuge'));
-            const formOrderEl = document.getElementById('formOrder');
-            if (formOrderEl && !activeMemberId) {
-              formOrderEl.value = siblings.length + 1;
-            }
           }
         }
       }
@@ -1911,14 +1868,54 @@
     }
   }
 
-  function handlePhotoUrlLoad() {
-    const url = memberPhotoUrlInput.value.trim();
-    if (!url) return;
+  async function pasteImageFromClipboard() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const imageType = item.types.find(t => t.startsWith('image/'));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              currentModalPhoto = evt.target.result;
+              renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
+              showToast('📋 ¡Foto pegada desde el portapapeles!');
+            };
+            reader.readAsDataURL(blob);
+            return;
+          }
+        }
+      }
+      showToast('ℹ️ No se detectó ninguna imagen en el portapapeles. Copia una imagen y presiona Ctrl + V.');
+    } catch (err) {
+      console.warn('Clipboard read error:', err);
+      showToast('💡 Presiona Ctrl + V para pegar la imagen que tienes copiada.');
+    }
+  }
 
-    currentModalPhoto = url;
-    renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
-    memberPhotoUrlInput.value = '';
-    showToast('📸 Enlace de imagen cargado.');
+  function handleGlobalPaste(e) {
+    if (!memberModal.classList.contains('active')) return;
+    const clipboardData = e.clipboardData || window.clipboardData;
+    if (!clipboardData || !clipboardData.items) return;
+
+    for (let i = 0; i < clipboardData.items.length; i++) {
+      const item = clipboardData.items[i];
+      if (item.type && item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            currentModalPhoto = evt.target.result;
+            renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
+            showToast('📋 ¡Foto pegada desde el portapapeles!');
+          };
+          reader.readAsDataURL(file);
+        }
+        return;
+      }
+    }
   }
 
   function saveModalMember() {
@@ -1940,25 +1937,55 @@
 
     member.name = rawName.toUpperCase();
     member.fullName = document.getElementById('formFullName').value.trim();
-    member.branch = document.getElementById('formBranch').value;
-    member.generation = parseInt(document.getElementById('formGeneration').value, 10) || 3;
-    member.role = document.getElementById('formRole').value.trim() || (isNew ? 'Integrante' : '');
-    member.badge = document.getElementById('formBadge').value.trim();
     member.gender = document.getElementById('formGender').value || 'M';
+
+    const parentId = document.getElementById('formParent').value || null;
+    const spouseId = document.getElementById('formSpouse').value || null;
+    member.parentId = parentId;
+    member.spouseId = spouseId;
+
+    // Rama determinada automáticamente por padres o cónyuge
+    if (parentId) {
+      const parent = getMember(parentId);
+      if (parent && parent.branch) {
+        member.branch = parent.branch;
+      }
+    } else if (spouseId) {
+      const spouse = getMember(spouseId);
+      if (spouse && spouse.branch) {
+        member.branch = spouse.branch;
+      }
+    } else if (!member.branch) {
+      member.branch = 'graciela';
+    }
+
+    // Generación y Rol integrados
+    const genRoleVal = document.getElementById('formGenerationRole').value;
+    const isConyuge = genRoleVal.endsWith('_conyuge');
+    const genNum = parseInt(genRoleVal, 10) || 3;
+    member.generation = genNum;
+
+    if (isConyuge) {
+      if (genNum === 2) member.role = 'Cónyuge';
+      else if (genNum === 3) member.role = 'Cónyuge Nieto';
+      else if (genNum === 4) member.role = 'Cónyuge Bisnieto';
+      else if (genNum === 5) member.role = 'Cónyuge Tataranieto';
+      else member.role = 'Cónyuge';
+    } else {
+      if (genNum === 1) member.role = member.gender === 'F' ? 'Matriarca' : 'Patriarca';
+      else if (genNum === 2) member.role = member.gender === 'F' ? 'Hija' : 'Hijo';
+      else if (genNum === 3) member.role = member.gender === 'F' ? 'Nieta' : 'Nieto';
+      else if (genNum === 4) member.role = member.gender === 'F' ? 'Bisnieta' : 'Bisnieto';
+      else if (genNum === 5) member.role = member.gender === 'F' ? 'Tataranieta' : 'Tataranieto';
+      else member.role = `Gen ${genNum}`;
+    }
+
     const rawBirthYear = document.getElementById('formBirthYear').value.trim();
     member.birthYear = rawBirthYear ? parseInt(rawBirthYear, 10) : null;
-    const rawOrder = document.getElementById('formOrder').value.trim();
-    member.order = rawOrder ? parseFloat(rawOrder) : null;
-    if (isNew && member.order === null && !member.birthYear) {
-      const peers = getSiblingPeers(member);
-      member.order = peers.length > 0 ? peers.length : 1;
-    }
-    member.spouseId = document.getElementById('formSpouse').value || null;
-    member.parentId = document.getElementById('formParent').value || null;
     member.notes = document.getElementById('formNotes').value.trim();
     member.photo = currentModalPhoto;
 
-    // Reciprocal spouse connection
+    // Conexión recíproca de cónyuge
     if (member.spouseId) {
       const spouse = getMember(member.spouseId);
       if (spouse && !spouse.spouseId) {
@@ -1993,7 +2020,16 @@
     activeMemberId = null;
     currentModalPhoto = null;
 
-    const branchId = preset.branch || 'graciela';
+    let branchId = preset.branch;
+    if (!branchId && preset.parentId) {
+      const parent = getMember(preset.parentId);
+      if (parent) branchId = parent.branch;
+    }
+    if (!branchId && preset.spouseId) {
+      const spouse = getMember(preset.spouseId);
+      if (spouse) branchId = spouse.branch;
+    }
+    if (!branchId) branchId = 'graciela';
     const br = getBranch(branchId);
 
     modalMemberName.textContent = 'Nuevo Integrante Familiar';
@@ -2007,18 +2043,17 @@
     document.getElementById('formMemberId').value = '';
     document.getElementById('formName').value = preset.name || '';
     document.getElementById('formFullName').value = preset.fullName || '';
-    document.getElementById('formBranch').value = branchId;
-    document.getElementById('formGeneration').value = preset.generation || 4;
-    document.getElementById('formRole').value = preset.role || 'Nuevo integrante';
-    document.getElementById('formBadge').value = preset.badge || '';
     document.getElementById('formGender').value = preset.gender || 'M';
-    document.getElementById('formBirthYear').value = preset.birthYear || '';
-    if (preset.parentId) {
-      const siblings = familyData.members.filter(c => c.parentId === preset.parentId && !c.role?.includes('Cónyuge'));
-      document.getElementById('formOrder').value = preset.order || (siblings.length + 1);
-    } else {
-      document.getElementById('formOrder').value = preset.order || '';
+
+    const genRoleSelect = document.getElementById('formGenerationRole');
+    if (genRoleSelect) {
+      const targetGen = preset.generation || 4;
+      const isConyuge = preset.role && preset.role.includes('Cónyuge');
+      const val = isConyuge ? `${targetGen}_conyuge` : `${targetGen}`;
+      genRoleSelect.value = val;
     }
+
+    document.getElementById('formBirthYear').value = preset.birthYear || '';
     document.getElementById('formNotes').value = preset.notes || '';
 
     populateSpouseAndParentSelects({
@@ -2027,14 +2062,6 @@
       parentId: preset.parentId || null
     });
 
-    if (preset.parentId) {
-      document.getElementById('formParent').value = preset.parentId;
-    }
-    if (preset.spouseId) {
-      document.getElementById('formSpouse').value = preset.spouseId;
-    }
-
-    renderModalSiblingOrder(null);
     renderModalPhotoPreview(null, 'Nuevo');
     memberModal.classList.add('active');
   }
@@ -2043,8 +2070,6 @@
     memberModal.classList.remove('active');
     activeMemberId = null;
     currentModalPhoto = null;
-    const siblingBox = document.getElementById('modalSiblingOrderBox');
-    if (siblingBox) siblingBox.style.display = 'none';
   }
 
   // --- EXPORT & IMPORT MODULES ---

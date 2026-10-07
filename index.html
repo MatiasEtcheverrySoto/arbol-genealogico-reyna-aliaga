@@ -241,28 +241,20 @@
               </label>
               <input type="file" id="memberPhotoFileInput" accept="image/*" style="display:none;">
 
+              <button type="button" id="pasteClipboardPhotoBtn" class="btn-photo-paste" title="Pegar imagen copiada del portapapeles">
+                📋 Pegar foto copiada
+              </button>
+
               <button type="button" id="removePhotoBtn" class="btn-photo-remove" title="Quitar foto actual">
                 🗑️ Quitar foto
               </button>
             </div>
 
-            <div class="photo-divider-row">
-              <span class="photo-divider-line"></span>
-              <span class="photo-divider-text">o pegar enlace web</span>
-              <span class="photo-divider-line"></span>
-            </div>
-
-            <div class="url-input-row">
-              <span class="url-input-icon">🔗</span>
-              <input type="text" id="memberPhotoUrlInput" placeholder="https://ejemplo.com/foto.jpg">
-              <button type="button" id="loadUrlPhotoBtn" class="btn btn-url-apply">Cargar</button>
-            </div>
-
-            <div class="photo-drop-hint">💡 Arrastra una imagen aquí o haz clic en el círculo</div>
+            <div class="photo-drop-hint">💡 Arrastra una imagen aquí o pega directamente con <strong>Ctrl + V</strong></div>
           </div>
         </div>
 
-        <!-- Form fields -->
+        <!-- Form fields simplificados -->
         <form id="memberForm" class="member-form">
           <input type="hidden" id="formMemberId">
 
@@ -279,36 +271,6 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="formBranch">Rama Familiar</label>
-              <select id="formBranch">
-                <!-- Opciones de rama -->
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="formGeneration">Generación</label>
-              <select id="formGeneration">
-                <option value="1">Gen 1: Patriarcas</option>
-                <option value="2">Gen 2: Hijos</option>
-                <option value="3">Gen 3: Nietos</option>
-                <option value="4">Gen 4: Bisnietos</option>
-                <option value="5">Gen 5: Tataranietos</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="formRole">Rol / Parentesco</label>
-              <input type="text" id="formRole" placeholder="Ej: Nieto, Cónyuge, Bisnieto">
-            </div>
-            <div class="form-group">
-              <label for="formBadge">Distinción / Título especial</label>
-              <input type="text" id="formBadge" placeholder="Ej: Sacerdote">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
               <label for="formGender">Género</label>
               <select id="formGender">
                 <option value="M">Masculino</option>
@@ -316,16 +278,18 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="formSpouseSearch">Cónyuge / Pareja</label>
-              <div class="searchable-combobox" id="spouseCombobox">
-                <div class="combobox-input-wrap">
-                  <span class="combobox-search-icon">🔍</span>
-                  <input type="text" id="formSpouseSearch" class="combobox-input" placeholder="Escribe para buscar cónyuge..." autocomplete="off">
-                  <button type="button" class="combobox-clear-btn" id="spouseClearBtn" title="Quitar cónyuge">&times;</button>
-                </div>
-                <input type="hidden" id="formSpouse" value="">
-                <div class="combobox-menu" id="spouseDropdownMenu"></div>
-              </div>
+              <label for="formGenerationRole">Generación y Rol</label>
+              <select id="formGenerationRole">
+                <option value="1">Gen 1: Cabezas de Familia (Patriarcas)</option>
+                <option value="2">Gen 2: Hijo / Hija</option>
+                <option value="2_conyuge">Gen 2: Cónyuge de Hijo/a</option>
+                <option value="3">Gen 3: Nieto / Nieta</option>
+                <option value="3_conyuge">Gen 3: Cónyuge de Nieto/a</option>
+                <option value="4">Gen 4: Bisnieto / Bisnieta</option>
+                <option value="4_conyuge">Gen 4: Cónyuge de Bisnieto/a</option>
+                <option value="5">Gen 5: Tataranieto / Tataranieta</option>
+                <option value="5_conyuge">Gen 5: Cónyuge de Tataranieto/a</option>
+              </select>
             </div>
           </div>
 
@@ -334,7 +298,7 @@
             <div class="searchable-combobox" id="parentCombobox">
               <div class="combobox-input-wrap">
                 <span class="combobox-search-icon">🔍</span>
-                <input type="text" id="formParentSearch" class="combobox-input" placeholder="Escribe para buscar padre o madre..." autocomplete="off">
+                <input type="text" id="formParentSearch" class="combobox-input" placeholder="Escribe para buscar progenitor..." autocomplete="off">
                 <button type="button" class="combobox-clear-btn" id="parentClearBtn" title="Quitar progenitor">&times;</button>
               </div>
               <input type="hidden" id="formParent" value="">
@@ -342,33 +306,28 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="formBirthYear">📅 Año de nacimiento / Edad</label>
-              <input type="number" id="formBirthYear" placeholder="Ej: 1985" min="1800" max="2099">
-              <span class="field-help-text">Ordena automáticamente de mayor a menor</span>
+          <div class="form-group">
+            <label for="formSpouseSearch">Cónyuge / Pareja</label>
+            <div class="searchable-combobox" id="spouseCombobox">
+              <div class="combobox-input-wrap">
+                <span class="combobox-search-icon">🔍</span>
+                <input type="text" id="formSpouseSearch" class="combobox-input" placeholder="Escribe para buscar cónyuge..." autocomplete="off">
+                <button type="button" class="combobox-clear-btn" id="spouseClearBtn" title="Quitar cónyuge">&times;</button>
+              </div>
+              <input type="hidden" id="formSpouse" value="">
+              <div class="combobox-menu" id="spouseDropdownMenu"></div>
             </div>
-            <div class="form-group">
-              <label for="formOrder">🔢 Orden (1 = El más grande)</label>
-              <input type="number" id="formOrder" placeholder="1 = Mayor, 2, 3..." min="1" max="99">
-              <span class="field-help-text">1 = El más grande / primer hijo, 2 = siguiente, etc.</span>
-            </div>
-          </div>
-
-          <div id="modalSiblingOrderBox" class="sibling-order-box" style="display: none;">
-            <div class="sibling-order-header">
-              <span class="sibling-order-title">👨‍👩‍👧‍👦 Posición entre hermanos / familia (del más grande al más chico):</span>
-            </div>
-            <div class="sibling-order-controls">
-              <button type="button" id="btnMoveOlder" class="btn secondary small">⬅️ Mover antes (Mayor)</button>
-              <button type="button" id="btnMoveYounger" class="btn secondary small">➡️ Mover después (Menor)</button>
-            </div>
-            <div id="modalSiblingList" class="sibling-order-list"></div>
           </div>
 
           <div class="form-group">
-            <label for="formNotes">Notas biográficas / Recuerdos</label>
-            <textarea id="formNotes" rows="3" placeholder="Información adicional sobre este integrante..."></textarea>
+            <label for="formBirthYear">📅 Año de nacimiento / Edad</label>
+            <input type="number" id="formBirthYear" placeholder="Ej: 1985" min="1800" max="2099">
+            <span class="field-help-text">Ordena automáticamente a los familiares de mayor a menor</span>
+          </div>
+
+          <div class="form-group">
+            <label for="formNotes">Notas biográficas, distinciones y recuerdos</label>
+            <textarea id="formNotes" rows="3" placeholder="Información adicional (distinciones como Sacerdote, profesión, recuerdos)..."></textarea>
           </div>
         </form>
       </div>
