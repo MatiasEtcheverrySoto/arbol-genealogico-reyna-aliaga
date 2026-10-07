@@ -1,0 +1,1274 @@
+/**
+ * Árbol Genealógico - Familia Reyna Aliaga
+ * Datos transcritos directamente de la imagen del árbol original (20261004_153147.jpg)
+ */
+
+const FAMILY_TREE_DATA = {
+  meta: {
+    familyName: "FAMILIA REYNA ALIAGA",
+    subtitle: "Árbol Genealógico Familiar",
+    description: "Transcripción digital interactiva con fotografías de cada integrante de la familia.",
+    generationsCount: 5,
+    sourceImage: "20261004_153147.jpg"
+  },
+  branches: [
+    {
+      id: "patron",
+      name: "Cabezas de Familia",
+      color: "#722F37", // Borgoña / Vino
+      badgeColor: "#8B263E",
+      textColor: "#ffffff"
+    },
+    {
+      id: "graciela",
+      name: "Rama Graciela",
+      headName: "Graciela & Héctor",
+      color: "#8B6F55", // Café / Bronce
+      badgeColor: "#755941",
+      textColor: "#ffffff"
+    },
+    {
+      id: "carlos",
+      name: "Rama Carlos",
+      headName: "Carlos & Alicia",
+      color: "#D49B24", // Dorado / Ocre
+      badgeColor: "#B88214",
+      textColor: "#ffffff"
+    },
+    {
+      id: "jorge",
+      name: "Rama Jorge",
+      headName: "Jorge & María Helena",
+      color: "#4E7345", // Verde oliva / Bosque
+      badgeColor: "#3F6037",
+      textColor: "#ffffff"
+    },
+    {
+      id: "marialaura",
+      name: "Rama María Laura",
+      headName: "María Laura & Jorge",
+      color: "#6C3A6E", // Violeta profundo
+      badgeColor: "#562A58",
+      textColor: "#ffffff"
+    },
+    {
+      id: "cecilia",
+      name: "Rama Cecilia",
+      headName: "Cecilia & Ernesto",
+      color: "#566573", // Gris pizarra
+      badgeColor: "#424E5A",
+      textColor: "#ffffff"
+    },
+    {
+      id: "adriana",
+      name: "Rama Adriana",
+      headName: "Adriana & Carlos",
+      color: "#B76E79", // Rosa viejo / Malva
+      badgeColor: "#9E5964",
+      textColor: "#ffffff"
+    },
+    {
+      id: "fernando",
+      name: "Rama Fernando",
+      headName: "Fernando & Teresa",
+      color: "#546E7A", // Gris perla azulado
+      badgeColor: "#37474F",
+      textColor: "#ffffff"
+    },
+    {
+      id: "joseluis",
+      name: "Rama José Luis",
+      headName: "José Luis",
+      color: "#2980B9", // Celeste / Azul cura
+      badgeColor: "#1F618D",
+      textColor: "#ffffff"
+    },
+    {
+      id: "isabel",
+      name: "Rama Isabel",
+      headName: "Isabel & Roberto",
+      color: "#D35400", // Ámbar / Naranja quemado
+      badgeColor: "#BA4A00",
+      textColor: "#ffffff"
+    },
+    {
+      id: "eugenio",
+      name: "Rama Eugenio",
+      headName: "Eugenio & Gabriela",
+      color: "#A93226", // Terracota / Carmesí
+      badgeColor: "#922B21",
+      textColor: "#ffffff"
+    },
+    {
+      id: "francisco",
+      name: "Rama Francisco",
+      headName: "Francisco & María Laura",
+      color: "#1B4F72", // Azul marino real
+      badgeColor: "#154360",
+      textColor: "#ffffff"
+    }
+  ],
+  members: [
+    // ==========================================
+    // GENERACIÓN 1: PATRIARCAS
+    // ==========================================
+    {
+      id: "carlos_alberto",
+      name: "CARLOS ALBERTO",
+      fullName: "Carlos Alberto Reyna",
+      branch: "patron",
+      generation: 1,
+      gender: "M",
+      role: "Patriarca",
+      spouseId: "maria_laura",
+      photo: "assets/carlos_alberto.jpg",
+      notes: "Patriarca de la Familia Reyna Aliaga."
+    },
+    {
+      id: "maria_laura",
+      name: "MARÍA LAURA",
+      fullName: "María Laura Aliaga de Reyna",
+      branch: "patron",
+      generation: 1,
+      gender: "F",
+      role: "Matriarca",
+      spouseId: "carlos_alberto",
+      photo: "assets/maria_laura.jpg",
+      notes: "Matriarca de la Familia Reyna Aliaga."
+    },
+
+    // ==========================================
+    // RAMA 1: GRACIELA (Café/Bronce)
+    // ==========================================
+    {
+      id: "graciela",
+      name: "GRACIELA",
+      fullName: "Graciela Reyna Aliaga",
+      branch: "graciela",
+      generation: 2,
+      gender: "F",
+      role: "Hija",
+      spouseId: "hector",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "hector",
+      name: "HECTOR",
+      fullName: "Héctor",
+      branch: "graciela",
+      generation: 2,
+      gender: "M",
+      role: "Cónyuge",
+      spouseId: "graciela",
+      photo: null
+    },
+    // Familia 1.1 Mateo & Susana
+    {
+      id: "mateo_g",
+      name: "MATEO",
+      fullName: "Mateo",
+      branch: "graciela",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "susana_g",
+      parentId: "graciela",
+      photo: null
+    },
+    {
+      id: "susana_g",
+      name: "SUSANA",
+      fullName: "Susana",
+      branch: "graciela",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "mateo_g",
+      photo: null
+    },
+    { id: "milagros_g", name: "MILAGROS", fullName: "Milagros", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "mateo_g", photo: null },
+    { id: "maria_paz_g", name: "MARÍA PAZ", fullName: "María Paz", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "mateo_g", photo: null },
+    { id: "trinidad_g", name: "TRINIDAD", fullName: "Trinidad", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "mateo_g", photo: null },
+    { id: "juan_g", name: "JUAN", fullName: "Juan", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "mateo_g", photo: null },
+
+    // Familia 1.2 Rodrigo & Carolina
+    {
+      id: "rodrigo_g",
+      name: "RODRIGO",
+      fullName: "Rodrigo",
+      branch: "graciela",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "carolina_g",
+      parentId: "graciela",
+      photo: null
+    },
+    {
+      id: "carolina_g",
+      name: "CAROLINA",
+      fullName: "Carolina",
+      branch: "graciela",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "rodrigo_g",
+      photo: null
+    },
+    { id: "guadalupe_g", name: "GUADALUPE", fullName: "Guadalupe", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "rodrigo_g", photo: null },
+    { id: "victoria_g", name: "VICTORIA", fullName: "Victoria", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "rodrigo_g", photo: null },
+    { id: "matias_g", name: "MATÍAS", fullName: "Matías", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "rodrigo_g", photo: null },
+
+    // Familia 1.3 Jimena & Ariel
+    {
+      id: "jimena_g",
+      name: "JIMENA",
+      fullName: "Jimena",
+      branch: "graciela",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "ariel_g",
+      parentId: "graciela",
+      photo: null
+    },
+    {
+      id: "ariel_g",
+      name: "ARIEL",
+      fullName: "Ariel",
+      branch: "graciela",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "jimena_g",
+      photo: null
+    },
+    { id: "andres_g", name: "ANDRÉS", fullName: "Andrés", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "jimena_g", photo: null },
+    { id: "joaquin_g", name: "JOAQUÍN", fullName: "Joaquín", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "jimena_g", photo: null },
+
+    // Familia 1.4 Rocío & Juan
+    {
+      id: "rocio_g",
+      name: "ROCÍO",
+      fullName: "Rocío",
+      branch: "graciela",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "juan_rocio_g",
+      parentId: "graciela",
+      photo: null
+    },
+    {
+      id: "juan_rocio_g",
+      name: "JUAN",
+      fullName: "Juan",
+      branch: "graciela",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "rocio_g",
+      photo: null
+    },
+    { id: "santiago_rocio_g", name: "SANTIAGO", fullName: "Santiago", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "rocio_g", photo: null },
+    { id: "mia_rocio_g", name: "MIA", fullName: "Mia", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "rocio_g", photo: null },
+    { id: "lucia_rocio_g", name: "LUCÍA", fullName: "Lucía", branch: "graciela", generation: 4, gender: "F", role: "Bisnieto", parentId: "rocio_g", photo: null },
+
+    // Familia 1.5 Martín & Rocío
+    {
+      id: "martin_g",
+      name: "MARTÍN",
+      fullName: "Martín",
+      branch: "graciela",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "rocio_martin_g",
+      parentId: "graciela",
+      photo: null
+    },
+    {
+      id: "rocio_martin_g",
+      name: "ROCÍO",
+      fullName: "Rocío",
+      branch: "graciela",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "martin_g",
+      photo: null
+    },
+    { id: "santiago_martin_g", name: "SANTIAGO", fullName: "Santiago", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "martin_g", photo: null },
+    { id: "joaquin_martin_g", name: "JOAQUÍN", fullName: "Joaquín", branch: "graciela", generation: 4, gender: "M", role: "Bisnieto", parentId: "martin_g", photo: null },
+
+    // ==========================================
+    // RAMA 2: CARLOS (Dorado/Ocre)
+    // ==========================================
+    {
+      id: "carlos_rama",
+      name: "CARLOS",
+      fullName: "Carlos Reyna Aliaga",
+      branch: "carlos",
+      generation: 2,
+      gender: "M",
+      role: "Hijo",
+      spouseId: "alicia_c",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "alicia_c",
+      name: "ALICIA",
+      fullName: "Alicia",
+      branch: "carlos",
+      generation: 2,
+      gender: "F",
+      role: "Cónyuge",
+      spouseId: "carlos_rama",
+      photo: null
+    },
+    // Familia 2.1 Mercedes & Pablo
+    {
+      id: "mercedes_c",
+      name: "MERCEDES",
+      fullName: "Mercedes",
+      branch: "carlos",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "pablo_c",
+      parentId: "carlos_rama",
+      photo: null
+    },
+    {
+      id: "pablo_c",
+      name: "PABLO",
+      fullName: "Pablo",
+      branch: "carlos",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "mercedes_c",
+      photo: null
+    },
+    { id: "ramiro_c", name: "RAMIRO", fullName: "Ramiro", branch: "carlos", generation: 4, gender: "M", role: "Bisnieto", parentId: "mercedes_c", photo: null },
+    { id: "rosario_c", name: "ROSARIO", fullName: "Rosario", branch: "carlos", generation: 4, gender: "F", role: "Bisnieto", parentId: "mercedes_c", photo: null },
+
+    // Familia 2.2 Consuelo & Gonzalo
+    {
+      id: "consuelo_c",
+      name: "CONSUELO",
+      fullName: "Consuelo",
+      branch: "carlos",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "gonzalo_c",
+      parentId: "carlos_rama",
+      photo: null
+    },
+    {
+      id: "gonzalo_c",
+      name: "GONZALO",
+      fullName: "Gonzalo",
+      branch: "carlos",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "consuelo_c",
+      photo: null
+    },
+
+    // ==========================================
+    // RAMA 3: JORGE (Verde oliva/Bosque)
+    // ==========================================
+    {
+      id: "jorge_rama",
+      name: "JORGE",
+      fullName: "Jorge Reyna Aliaga",
+      branch: "jorge",
+      generation: 2,
+      gender: "M",
+      role: "Hijo",
+      spouseId: "maria_helena_j",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "maria_helena_j",
+      name: "MARÍA HELENA",
+      fullName: "María Helena",
+      branch: "jorge",
+      generation: 2,
+      gender: "F",
+      role: "Cónyuge",
+      spouseId: "jorge_rama",
+      photo: null
+    },
+    // Familia 3.1 Patricia & Javier
+    {
+      id: "patricia_j",
+      name: "PATRICIA",
+      fullName: "Patricia",
+      branch: "jorge",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "javier_j",
+      parentId: "jorge_rama",
+      photo: null
+    },
+    {
+      id: "javier_j",
+      name: "JAVIER",
+      fullName: "Javier",
+      branch: "jorge",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "patricia_j",
+      photo: null
+    },
+    { id: "josefina_j", name: "JOSEFINA", fullName: "Josefina", branch: "jorge", generation: 4, gender: "F", role: "Bisnieto", parentId: "patricia_j", photo: null },
+    { id: "felipe_j", name: "FELIPE", fullName: "Felipe", branch: "jorge", generation: 4, gender: "M", role: "Bisnieto", parentId: "patricia_j", photo: null },
+
+    // Familia 3.2 Alejandra & Matías
+    {
+      id: "alejandra_j",
+      name: "ALEJANDRA",
+      fullName: "Alejandra",
+      branch: "jorge",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "matias_j",
+      parentId: "jorge_rama",
+      photo: null
+    },
+    {
+      id: "matias_j",
+      name: "MATÍAS",
+      fullName: "Matías",
+      branch: "jorge",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "alejandra_j",
+      photo: null
+    },
+    { id: "pedro_j", name: "PEDRO", fullName: "Pedro", branch: "jorge", generation: 4, gender: "M", role: "Bisnieto", parentId: "alejandra_j", photo: null },
+    { id: "tomas_j", name: "TOMÁS", fullName: "Tomás", branch: "jorge", generation: 4, gender: "M", role: "Bisnieto", parentId: "alejandra_j", photo: null },
+    { id: "santiago_j", name: "SANTIAGO", fullName: "Santiago", branch: "jorge", generation: 4, gender: "M", role: "Bisnieto", parentId: "alejandra_j", photo: null },
+
+    // Individuo 3.3 Amalia
+    {
+      id: "amalia_j",
+      name: "AMALIA",
+      fullName: "Amalia",
+      branch: "jorge",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      parentId: "jorge_rama",
+      photo: null
+    },
+
+    // ==========================================
+    // RAMA 4: MARÍA LAURA (Violeta profundo)
+    // ==========================================
+    {
+      id: "marialaura_rama",
+      name: "MARÍA LAURA",
+      fullName: "María Laura Reyna Aliaga",
+      branch: "marialaura",
+      generation: 2,
+      gender: "F",
+      role: "Hija",
+      spouseId: "jorge_ml",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "jorge_ml",
+      name: "JORGE",
+      fullName: "Jorge",
+      branch: "marialaura",
+      generation: 2,
+      gender: "M",
+      role: "Cónyuge",
+      spouseId: "marialaura_rama",
+      photo: null
+    },
+    // Familia 4.1 Federico & Carolina
+    {
+      id: "federico_ml",
+      name: "FEDERICO",
+      fullName: "Federico",
+      branch: "marialaura",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "carolina_ml",
+      parentId: "marialaura_rama",
+      photo: null
+    },
+    {
+      id: "carolina_ml",
+      name: "CAROLINA",
+      fullName: "Carolina",
+      branch: "marialaura",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "federico_ml",
+      photo: null
+    },
+    { id: "catalina_ml", name: "CATALINA", fullName: "Catalina", branch: "marialaura", generation: 4, gender: "F", role: "Bisnieto", parentId: "federico_ml", photo: null },
+    { id: "benjamin_ml", name: "BENJAMÍN", fullName: "Benjamín", branch: "marialaura", generation: 4, gender: "M", role: "Bisnieto", parentId: "federico_ml", photo: null },
+
+    // Familia 4.2 Laura
+    {
+      id: "laura_ml",
+      name: "LAURA",
+      fullName: "Laura",
+      branch: "marialaura",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      parentId: "marialaura_rama",
+      photo: null
+    },
+    { id: "inigo_ml", name: "IÑIGO", fullName: "Iñigo", branch: "marialaura", generation: 4, gender: "M", role: "Bisnieto", parentId: "laura_ml", photo: null },
+    { id: "helena_ml", name: "HELENA", fullName: "Helena", branch: "marialaura", generation: 4, gender: "F", role: "Bisnieto", parentId: "laura_ml", photo: null },
+
+    // ==========================================
+    // RAMA 5: CECILIA (Gris pizarra)
+    // ==========================================
+    {
+      id: "cecilia_rama",
+      name: "CECILIA",
+      fullName: "Cecilia Reyna Aliaga",
+      branch: "cecilia",
+      generation: 2,
+      gender: "F",
+      role: "Hija",
+      spouseId: "ernesto_cec",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "ernesto_cec",
+      name: "ERNESTO",
+      fullName: "Ernesto",
+      branch: "cecilia",
+      generation: 2,
+      gender: "M",
+      role: "Cónyuge",
+      spouseId: "cecilia_rama",
+      photo: null
+    },
+    // Familia 5.1 Carlos Patricio & María Ángela
+    {
+      id: "carlos_patricio_cec",
+      name: "CARLOS PATRICIO",
+      fullName: "Carlos Patricio",
+      branch: "cecilia",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "maria_angela_cec",
+      parentId: "cecilia_rama",
+      photo: null
+    },
+    {
+      id: "maria_angela_cec",
+      name: "MARÍA ÁNGELA",
+      fullName: "María Ángela",
+      branch: "cecilia",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "carlos_patricio_cec",
+      photo: null
+    },
+    { id: "ludmila_cec", name: "LUDMILA", fullName: "Ludmila", branch: "cecilia", generation: 4, gender: "F", role: "Bisnieto", parentId: "carlos_patricio_cec", photo: null },
+    { id: "alicia_cec", name: "ALICIA", fullName: "Alicia", branch: "cecilia", generation: 4, gender: "F", role: "Bisnieto", parentId: "carlos_patricio_cec", photo: null },
+    { id: "rodrigo_cec", name: "RODRIGO", fullName: "Rodrigo", branch: "cecilia", generation: 4, gender: "M", role: "Bisnieto", parentId: "carlos_patricio_cec", photo: null },
+
+    // Familia 5.2 Soledad & Sergio
+    {
+      id: "soledad_cec",
+      name: "SOLEDAD",
+      fullName: "Soledad",
+      branch: "cecilia",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "sergio_cec",
+      parentId: "cecilia_rama",
+      photo: null
+    },
+    {
+      id: "sergio_cec",
+      name: "SERGIO",
+      fullName: "Sergio",
+      branch: "cecilia",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "soledad_cec",
+      photo: null
+    },
+    {
+      id: "cecilia_sol_cec",
+      name: "CECILIA",
+      fullName: "Cecilia",
+      branch: "cecilia",
+      generation: 4,
+      gender: "F",
+      role: "Bisnieto",
+      spouseId: "mingo_cec",
+      parentId: "soledad_cec",
+      photo: null
+    },
+    {
+      id: "mingo_cec",
+      name: "MINGO",
+      fullName: "Mingo",
+      branch: "cecilia",
+      generation: 4,
+      gender: "M",
+      role: "Cónyuge Bisnieto",
+      spouseId: "cecilia_sol_cec",
+      photo: null
+    },
+    {
+      id: "nicolas_cec",
+      name: "NICOLÁS",
+      fullName: "Nicolás",
+      branch: "cecilia",
+      generation: 4,
+      gender: "M",
+      role: "Bisnieto",
+      spouseId: "sharon_cec",
+      parentId: "soledad_cec",
+      photo: null
+    },
+    {
+      id: "sharon_cec",
+      name: "SHARON",
+      fullName: "Sharon",
+      branch: "cecilia",
+      generation: 4,
+      gender: "F",
+      role: "Cónyuge Bisnieto",
+      spouseId: "nicolas_cec",
+      photo: null
+    },
+    { id: "santino_cec", name: "SANTINO", fullName: "Santino", branch: "cecilia", generation: 5, gender: "M", role: "Tataranieto", parentId: "nicolas_cec", photo: null },
+    { id: "emiliano_ernesto_cec", name: "ERNESTO", fullName: "Ernesto", branch: "cecilia", generation: 5, gender: "M", role: "Tataranieto", parentId: "nicolas_cec", photo: null },
+    {
+      id: "nazareno_cec",
+      name: "NAZARENO",
+      fullName: "Nazareno",
+      branch: "cecilia",
+      generation: 4,
+      gender: "M",
+      role: "Bisnieto",
+      parentId: "soledad_cec",
+      photo: null
+    },
+
+    // ==========================================
+    // RAMA 6: ADRIANA (Rosa viejo/Malva)
+    // ==========================================
+    {
+      id: "adriana_rama",
+      name: "ADRIANA",
+      fullName: "Adriana Reyna Aliaga",
+      branch: "adriana",
+      generation: 2,
+      gender: "F",
+      role: "Hija",
+      spouseId: "carlos_adr",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "carlos_adr",
+      name: "CARLOS",
+      fullName: "Carlos",
+      branch: "adriana",
+      generation: 2,
+      gender: "M",
+      role: "Cónyuge",
+      spouseId: "adriana_rama",
+      photo: null
+    },
+    // Familia 6.1 Carlos & Jorgelina
+    {
+      id: "carlos_hijo_adr",
+      name: "CARLOS",
+      fullName: "Carlos",
+      branch: "adriana",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "jorgelina_adr",
+      parentId: "adriana_rama",
+      photo: null
+    },
+    {
+      id: "jorgelina_adr",
+      name: "JORGELINA",
+      fullName: "Jorgelina",
+      branch: "adriana",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "carlos_hijo_adr",
+      photo: null
+    },
+    { id: "manuel_adr", name: "MANUEL", fullName: "Manuel", branch: "adriana", generation: 4, gender: "M", role: "Bisnieto", parentId: "carlos_hijo_adr", photo: null },
+    { id: "bartolome_adr", name: "BARTOLOMÉ", fullName: "Bartolomé", branch: "adriana", generation: 4, gender: "M", role: "Bisnieto", parentId: "carlos_hijo_adr", photo: null },
+    { id: "antonio_adr", name: "ANTONIO", fullName: "Antonio", branch: "adriana", generation: 4, gender: "M", role: "Bisnieto", parentId: "carlos_hijo_adr", photo: null },
+
+    // Familia 6.2 Paula & Joaquín
+    {
+      id: "paula_adr",
+      name: "PAULA",
+      fullName: "Paula",
+      branch: "adriana",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "joaquin_adr",
+      parentId: "adriana_rama",
+      photo: null
+    },
+    {
+      id: "joaquin_adr",
+      name: "JOAQUÍN",
+      fullName: "Joaquín",
+      branch: "adriana",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "paula_adr",
+      photo: null
+    },
+    { id: "lorenzo_adr", name: "LORENZO", fullName: "Lorenzo", branch: "adriana", generation: 4, gender: "M", role: "Bisnieto", parentId: "paula_adr", photo: null },
+    { id: "blanca_adr", name: "BLANCA", fullName: "Blanca", branch: "adriana", generation: 4, gender: "F", role: "Bisnieto", parentId: "paula_adr", photo: null },
+
+    // Individuo 6.3 Agustín
+    {
+      id: "agustin_adr",
+      name: "AGUSTÍN",
+      fullName: "Agustín",
+      branch: "adriana",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      parentId: "adriana_rama",
+      photo: null
+    },
+
+    // ==========================================
+    // RAMA 7: FERNANDO (Gris perla azulado)
+    // ==========================================
+    {
+      id: "fernando_rama",
+      name: "FERNANDO",
+      fullName: "Fernando Reyna Aliaga",
+      branch: "fernando",
+      generation: 2,
+      gender: "M",
+      role: "Hijo",
+      spouseId: "teresa_fer",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "teresa_fer",
+      name: "TERESA",
+      fullName: "Teresa",
+      branch: "fernando",
+      generation: 2,
+      gender: "F",
+      role: "Cónyuge",
+      spouseId: "fernando_rama",
+      photo: null
+    },
+    // Descendencia Fernando & Teresa
+    {
+      id: "ines_fer",
+      name: "INÉS",
+      fullName: "Inés",
+      branch: "fernando",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "franco_fer",
+      parentId: "fernando_rama",
+      photo: null
+    },
+    {
+      id: "franco_fer",
+      name: "FRANCO",
+      fullName: "Franco",
+      branch: "fernando",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "ines_fer",
+      photo: null
+    },
+    {
+      id: "cecilia_fer",
+      name: "CECILIA",
+      fullName: "Cecilia",
+      branch: "fernando",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "juan_cec_fer",
+      parentId: "fernando_rama",
+      photo: null
+    },
+    {
+      id: "juan_cec_fer",
+      name: "JUAN",
+      fullName: "Juan",
+      branch: "fernando",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "cecilia_fer",
+      photo: null
+    },
+    { id: "leon_fer", name: "LEÓN", fullName: "León", branch: "fernando", generation: 4, gender: "M", role: "Bisnieto", parentId: "cecilia_fer", photo: null },
+
+    {
+      id: "lucia_fer",
+      name: "LUCÍA",
+      fullName: "Lucía",
+      branch: "fernando",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "emiliano_fer",
+      parentId: "fernando_rama",
+      photo: null
+    },
+    {
+      id: "emiliano_fer",
+      name: "EMILIANO",
+      fullName: "Emiliano",
+      branch: "fernando",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "lucia_fer",
+      photo: null
+    },
+    { id: "francisco_luc_fer", name: "FRANCISCO", fullName: "Francisco", branch: "fernando", generation: 4, gender: "M", role: "Bisnieto", parentId: "lucia_fer", photo: null },
+    { id: "felipe_luc_fer", name: "FELIPE", fullName: "Felipe", branch: "fernando", generation: 4, gender: "M", role: "Bisnieto", parentId: "lucia_fer", photo: null },
+
+    { id: "martin_fer", name: "MARTÍN", fullName: "Martín", branch: "fernando", generation: 3, gender: "M", role: "Nieto", parentId: "fernando_rama", photo: null },
+    { id: "juan_ignacio_fer", name: "JUAN IGNACIO", fullName: "Juan Ignacio", branch: "fernando", generation: 3, gender: "M", role: "Nieto", parentId: "fernando_rama", photo: null },
+    { id: "gonzalo_fer", name: "GONZALO", fullName: "Gonzalo", branch: "fernando", generation: 3, gender: "M", role: "Nieto", parentId: "fernando_rama", photo: null },
+
+    {
+      id: "santiago_fer",
+      name: "SANTIAGO",
+      fullName: "Santiago",
+      branch: "fernando",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "valentina_fer",
+      parentId: "fernando_rama",
+      photo: null
+    },
+    {
+      id: "valentina_fer",
+      name: "VALENTINA",
+      fullName: "Valentina",
+      branch: "fernando",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "santiago_fer",
+      photo: null
+    },
+
+    {
+      id: "belen_fer",
+      name: "BELÉN",
+      fullName: "Belén",
+      branch: "fernando",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "javier_fer",
+      parentId: "fernando_rama",
+      photo: null
+    },
+    {
+      id: "javier_fer",
+      name: "JAVIER",
+      fullName: "Javier",
+      branch: "fernando",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "belen_fer",
+      photo: null
+    },
+
+    { id: "hernan_fer", name: "HERNÁN", fullName: "Hernán", branch: "fernando", generation: 3, gender: "M", role: "Nieto", parentId: "fernando_rama", photo: null },
+
+    {
+      id: "mariana_fer",
+      name: "MARIANA",
+      fullName: "Mariana",
+      branch: "fernando",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "rodrigo_fer",
+      parentId: "fernando_rama",
+      photo: null
+    },
+    {
+      id: "rodrigo_fer",
+      name: "RODRIGO",
+      fullName: "Rodrigo",
+      branch: "fernando",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "mariana_fer",
+      photo: null
+    },
+
+    { id: "victoria_fer", name: "VICTORIA", fullName: "Victoria", branch: "fernando", generation: 3, gender: "F", role: "Nieto", parentId: "fernando_rama", photo: null },
+
+    // ==========================================
+    // RAMA 8: JOSÉ LUIS (Celeste / Sacerdote)
+    // ==========================================
+    {
+      id: "jose_luis_rama",
+      name: "JOSÉ LUIS",
+      fullName: "José Luis Reyna Aliaga",
+      branch: "joseluis",
+      generation: 2,
+      gender: "M",
+      role: "Hijo",
+      badge: "SACERDOTE",
+      parentId: "carlos_alberto",
+      photo: null,
+      notes: "Sacerdote. Consagrado a la vida religiosa."
+    },
+
+    // ==========================================
+    // RAMA 9: ISABEL (Ámbar / Naranja)
+    // ==========================================
+    {
+      id: "isabel_rama",
+      name: "ISABEL",
+      fullName: "Isabel Reyna Aliaga",
+      branch: "isabel",
+      generation: 2,
+      gender: "F",
+      role: "Hija",
+      spouseId: "roberto_isa",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "roberto_isa",
+      name: "ROBERTO",
+      fullName: "Roberto",
+      branch: "isabel",
+      generation: 2,
+      gender: "M",
+      role: "Cónyuge",
+      spouseId: "isabel_rama",
+      photo: null
+    },
+    // Familia 9.1 Bernardo & Marcela
+    {
+      id: "bernardo_isa",
+      name: "BERNARDO",
+      fullName: "Bernardo",
+      branch: "isabel",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "marcela_isa",
+      parentId: "isabel_rama",
+      photo: null
+    },
+    {
+      id: "marcela_isa",
+      name: "MARCELA",
+      fullName: "Marcela",
+      branch: "isabel",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "bernardo_isa",
+      photo: null
+    },
+    { id: "mia_isa", name: "MIA", fullName: "Mia", branch: "isabel", generation: 4, gender: "F", role: "Bisnieto", parentId: "bernardo_isa", photo: null },
+
+    // Familia 9.2 Clara & Mariano
+    {
+      id: "clara_isa",
+      name: "CLARA",
+      fullName: "Clara",
+      branch: "isabel",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "mariano_isa",
+      parentId: "isabel_rama",
+      photo: null
+    },
+    {
+      id: "mariano_isa",
+      name: "MARIANO",
+      fullName: "Mariano",
+      branch: "isabel",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "clara_isa",
+      photo: null
+    },
+
+    // ==========================================
+    // RAMA 10: EUGENIO (Terracota / Carmesí)
+    // ==========================================
+    {
+      id: "eugenio_rama",
+      name: "EUGENIO",
+      fullName: "Eugenio Reyna Aliaga",
+      branch: "eugenio",
+      generation: 2,
+      gender: "M",
+      role: "Hijo",
+      spouseId: "gabriela_eug",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "gabriela_eug",
+      name: "GABRIELA",
+      fullName: "Gabriela",
+      branch: "eugenio",
+      generation: 2,
+      gender: "F",
+      role: "Cónyuge",
+      spouseId: "eugenio_rama",
+      photo: null
+    },
+    // Familia 10.1 Juan Ignacio & Carla
+    {
+      id: "juan_ignacio_eug",
+      name: "JUAN IGNACIO",
+      fullName: "Juan Ignacio",
+      branch: "eugenio",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "carla_eug",
+      parentId: "eugenio_rama",
+      photo: null
+    },
+    {
+      id: "carla_eug",
+      name: "CARLA",
+      fullName: "Carla",
+      branch: "eugenio",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "juan_ignacio_eug",
+      photo: null
+    },
+    { id: "lucas_eug", name: "LUCAS", fullName: "Lucas", branch: "eugenio", generation: 4, gender: "M", role: "Bisnieto", parentId: "juan_ignacio_eug", photo: null },
+
+    // Familia 10.2 Carlos Alberto & Andrea
+    {
+      id: "carlos_alberto_hijo_eug",
+      name: "CARLOS ALBERTO",
+      fullName: "Carlos Alberto",
+      branch: "eugenio",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "andrea_eug",
+      parentId: "eugenio_rama",
+      photo: null
+    },
+    {
+      id: "andrea_eug",
+      name: "ANDREA",
+      fullName: "Andrea",
+      branch: "eugenio",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "carlos_alberto_hijo_eug",
+      photo: null
+    },
+    { id: "constanza_eug", name: "CONSTANZA", fullName: "Constanza", branch: "eugenio", generation: 4, gender: "F", role: "Bisnieto", parentId: "carlos_alberto_hijo_eug", photo: null },
+    { id: "tiziano_eug", name: "TIZIANO", fullName: "Tiziano", branch: "eugenio", generation: 4, gender: "M", role: "Bisnieto", parentId: "carlos_alberto_hijo_eug", photo: null },
+    { id: "maria_cecilia_eug", name: "MARÍA CECILIA", fullName: "María Cecilia", branch: "eugenio", generation: 4, gender: "F", role: "Bisnieto", parentId: "carlos_alberto_hijo_eug", photo: null },
+
+    // Familia 10.3 Eugenia & Thiago
+    {
+      id: "eugenia_eug",
+      name: "EUGENIA",
+      fullName: "Eugenia",
+      branch: "eugenio",
+      generation: 3,
+      gender: "F",
+      role: "Nieto",
+      spouseId: "thiago_eug",
+      parentId: "eugenio_rama",
+      photo: null
+    },
+    {
+      id: "thiago_eug",
+      name: "THIAGO",
+      fullName: "Thiago",
+      branch: "eugenio",
+      generation: 3,
+      gender: "M",
+      role: "Cónyuge Nieto",
+      spouseId: "eugenia_eug",
+      photo: null
+    },
+    { id: "mateo_eug", name: "MATEO", fullName: "Mateo", branch: "eugenio", generation: 4, gender: "M", role: "Bisnieto", parentId: "eugenia_eug", photo: null },
+
+    // Individuo 10.4 Valen
+    { id: "valen_eug", name: "VALEN", fullName: "Valen", branch: "eugenio", generation: 3, gender: "M", role: "Nieto", parentId: "eugenio_rama", photo: null },
+    // Individuo 10.5 Agustín
+    { id: "agustin_eug", name: "AGUSTÍN", fullName: "Agustín", branch: "eugenio", generation: 3, gender: "M", role: "Nieto", parentId: "eugenio_rama", photo: null },
+
+    // ==========================================
+    // RAMA 11: FRANCISCO (Azul marino real)
+    // ==========================================
+    {
+      id: "francisco_rama",
+      name: "FRANCISCO",
+      fullName: "Francisco Reyna Aliaga",
+      branch: "francisco",
+      generation: 2,
+      gender: "M",
+      role: "Hijo",
+      spouseId: "maria_laura_fran",
+      parentId: "carlos_alberto",
+      photo: null
+    },
+    {
+      id: "maria_laura_fran",
+      name: "MARÍA LAURA",
+      fullName: "María Laura",
+      branch: "francisco",
+      generation: 2,
+      gender: "F",
+      role: "Cónyuge",
+      spouseId: "francisco_rama",
+      photo: null
+    },
+    // Familia 11.1 Marcos & Ángeles
+    {
+      id: "marcos_fran",
+      name: "MARCOS",
+      fullName: "Marcos",
+      branch: "francisco",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "angeles_fran",
+      parentId: "francisco_rama",
+      photo: null
+    },
+    {
+      id: "angeles_fran",
+      name: "ÁNGELES",
+      fullName: "Ángeles",
+      branch: "francisco",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "marcos_fran",
+      photo: null
+    },
+    { id: "maria_emilia_fran", name: "MARÍA EMILIA", fullName: "María Emilia", branch: "francisco", generation: 4, gender: "F", role: "Bisnieto", parentId: "marcos_fran", photo: null },
+    { id: "felipe_marcos_fran", name: "FELIPE", fullName: "Felipe", branch: "francisco", generation: 4, gender: "M", role: "Bisnieto", parentId: "marcos_fran", photo: null },
+
+    // Familia 11.2 Francisco & Camila
+    {
+      id: "francisco_hijo_fran",
+      name: "FRANCISCO",
+      fullName: "Francisco",
+      branch: "francisco",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "camila_fran",
+      parentId: "francisco_rama",
+      photo: null
+    },
+    {
+      id: "camila_fran",
+      name: "CAMILA",
+      fullName: "Camila",
+      branch: "francisco",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "francisco_hijo_fran",
+      photo: null
+    },
+    { id: "tomas_fran", name: "TOMÁS", fullName: "Tomás", branch: "francisco", generation: 4, gender: "M", role: "Bisnieto", parentId: "francisco_hijo_fran", photo: null },
+    { id: "roque_fran", name: "ROQUE", fullName: "Roque", branch: "francisco", generation: 4, gender: "M", role: "Bisnieto", parentId: "francisco_hijo_fran", photo: null },
+
+    // Familia 11.3 Juan Cruz & Milagros
+    {
+      id: "juan_cruz_fran",
+      name: "JUAN CRUZ",
+      fullName: "Juan Cruz",
+      branch: "francisco",
+      generation: 3,
+      gender: "M",
+      role: "Nieto",
+      spouseId: "milagros_fran",
+      parentId: "francisco_rama",
+      photo: null
+    },
+    {
+      id: "milagros_fran",
+      name: "MILAGROS",
+      fullName: "Milagros",
+      branch: "francisco",
+      generation: 3,
+      gender: "F",
+      role: "Cónyuge Nieto",
+      spouseId: "juan_cruz_fran",
+      photo: null
+    },
+    { id: "maria_carmen_fran", name: "MARÍA DEL CARMEN", fullName: "María del Carmen", branch: "francisco", generation: 4, gender: "F", role: "Bisnieto", parentId: "juan_cruz_fran", photo: null }
+  ]
+};
+
+// Exportación modular o para uso en navegador
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = FAMILY_TREE_DATA;
+}

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Árbol Genealógico - Familia Reyna Aliaga</title>
+  <meta name="description" content="Árbol genealógico interactivo de la Familia Reyna Aliaga con fotografías de cada integrante, navegación panorámica, búsqueda y gestión de miembros.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-magnolia">
+
+  <!-- Header & Toolbar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="family-crest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="family-title">Familia Reyna Aliaga</h1>
+        <p class="family-subtitle">Árbol Genealógico Oficial • 5 Generaciones • 11 Ramas Familiares</p>
+      </div>
+    </div>
+
+    <!-- Center Search & Filter -->
+    <div class="header-center">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="memberSearchInput" placeholder="Buscar integrante (ej: Santiago, Teresa, Lucas...)" autocomplete="off">
+        <button id="clearSearchBtn" class="clear-search-btn" title="Limpiar búsqueda" style="display:none;">&times;</button>
+        <div id="searchResultsDropdown" class="search-dropdown"></div>
+      </div>
+
+      <!-- Quick Branch Filter -->
+      <select id="branchFilterSelect" class="filter-select" title="Filtrar por rama">
+        <option value="all">Todas las ramas (11)</option>
+        <option value="graciela">Rama Graciela</option>
+        <option value="carlos">Rama Carlos</option>
+        <option value="jorge">Rama Jorge</option>
+        <option value="marialaura">Rama María Laura</option>
+        <option value="cecilia">Rama Cecilia</option>
+        <option value="adriana">Rama Adriana</option>
+        <option value="fernando">Rama Fernando</option>
+        <option value="joseluis">Rama José Luis (Sacerdote)</option>
+        <option value="isabel">Rama Isabel</option>
+        <option value="eugenio">Rama Eugenio</option>
+        <option value="francisco">Rama Francisco</option>
+      </select>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="header-right">
+      <!-- Photo Completion Status Badge -->
+      <div class="photo-progress-badge" id="photoProgressBadge" title="Progreso de fotos añadidas">
+        <span class="camera-icon">📸</span>
+        <span id="photoProgressText">0 / 0 Fotos</span>
+        <div class="mini-progress-bar">
+          <div id="photoProgressBarFill" class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- View Switcher -->
+      <div class="view-switcher">
+        <button class="view-btn active" data-view="tree" title="Vista Árbol Panorámico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Árbol
+        </button>
+        <button class="view-btn" data-view="branches" title="Vista Agrupada por Ramas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Ramas
+        </button>
+        <button class="view-btn" data-view="directory" title="Directorio y Lista de Personas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          Directorio
+        </button>
+      </div>
+
+      <!-- More Actions Menu Button -->
+      <button id="actionsMenuBtn" class="action-btn primary" title="Herramientas y exportación">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+        Opciones
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div id="actionsDropdown" class="actions-dropdown">
+        <button id="addMemberBtn"><span class="menu-icon">➕</span> Agregar Integrante</button>
+        <div class="dropdown-divider"></div>
+        <button id="exportJsonBtn"><span class="menu-icon">💾</span> Exportar Respaldo (JSON con fotos)</button>
+        <button id="importJsonBtn"><span class="menu-icon">📂</span> Importar Respaldo (JSON)</button>
+        <input type="file" id="importJsonFileInput" accept=".json" style="display:none;">
+        <button id="exportCsvBtn"><span class="menu-icon">📊</span> Exportar a Excel (CSV)</button>
+        <button id="exportGedcomBtn"><span class="menu-icon">📜</span> Exportar a GEDCOM (.ged)</button>
+        <button id="printTreeBtn"><span class="menu-icon">🖨️</span> Imprimir / Exportar a PDF</button>
+        <div class="dropdown-divider"></div>
+        <button id="toggleThemeBtn"><span class="menu-icon">🎨</span> Cambiar Fondo (Tapiz / Claro / Oscuro)</button>
+        <button id="resetDataBtn" class="danger-btn"><span class="menu-icon">🔄</span> Restaurar Árbol Original</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace / Views Container -->
+  <main class="main-container">
+
+    <!-- 1. VISTA ÁRBOL (INFINITE CANVAS) -->
+    <section id="treeViewSection" class="view-section active">
+      <div id="canvasViewport" class="canvas-viewport">
+        <div id="canvasContent" class="canvas-content">
+          <!-- SVG Connector Lines Overlay -->
+          <svg id="treeConnectionsSvg" class="connections-svg"></svg>
+          <!-- Tree Nodes Container -->
+          <div id="treeDomContainer" class="tree-dom-container"></div>
+        </div>
+      </div>
+
+      <!-- Canvas Floating Controls HUD -->
+      <aside class="canvas-hud">
+        <div class="zoom-controls">
+          <button id="zoomInBtn" class="hud-btn" title="Acercar (+)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+          <span id="zoomLevelIndicator" class="zoom-level">100%</span>
+          <button id="zoomOutBtn" class="hud-btn" title="Alejar (-)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+          <div class="hud-divider"></div>
+          <button id="fitScreenBtn" class="hud-btn" title="Ajustar todo el árbol a la pantalla">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+          </button>
+          <button id="resetViewBtn" class="hud-btn" title="Centrar en Patriarcas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
+          </button>
+        </div>
+
+        <!-- Help Tooltip Trigger -->
+        <button id="canvasHelpBtn" class="hud-btn" title="Atajos de teclado y ayuda">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </button>
+      </aside>
+
+      <!-- Mini-map Widget -->
+      <div id="miniMapContainer" class="mini-map-container" title="Arrastra para mover la vista">
+        <canvas id="miniMapCanvas" width="220" height="110"></canvas>
+        <div id="miniMapLens" class="mini-map-lens"></div>
+      </div>
+    </section>
+
+    <!-- 2. VISTA POR RAMAS (GRID & CARDS) -->
+    <section id="branchesViewSection" class="view-section">
+      <div class="branches-container" id="branchesContainer">
+        <!-- Generado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- 3. VISTA DIRECTORIO (TABLA / LISTA DE PERSONAS) -->
+    <section id="directoryViewSection" class="view-section">
+      <div class="directory-container">
+        <div class="directory-toolbar">
+          <div class="directory-stats" id="directoryStats">
+            <!-- Estadísticas en tiempo real -->
+          </div>
+          <div class="directory-filters">
+            <label class="checkbox-filter">
+              <input type="checkbox" id="missingPhotoOnlyCheckbox">
+              Solo personas sin foto
+            </label>
+          </div>
+        </div>
+        <div class="directory-table-wrapper">
+          <table class="directory-table" id="directoryTable">
+            <thead>
+              <tr>
+                <th>Foto</th>
+                <th>Nombre</th>
+                <th>Rama Familiar</th>
+                <th>Generación</th>
+                <th>Rol / Parentesco</th>
+                <th>Cónyuge</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="directoryTableBody">
+              <!-- Rellenado por app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Editar Integrante & Subir Foto -->
+  <div id="memberModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 id="modalMemberName" class="modal-title">Editar Integrante</h2>
+          <span id="modalBranchTag" class="branch-tag">Rama</span>
+        </div>
+        <button id="modalCloseBtn" class="close-btn" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Photo Management Panel -->
+        <div class="photo-edit-section">
+          <div class="photo-preview-wrap">
+            <div id="modalPhotoPreview" class="modal-photo-preview empty">
+              <!-- Imagen o Iniciales -->
+            </div>
+            <div class="photo-drop-hint">Arrastra y suelta una imagen aquí</div>
+          </div>
+
+          <div class="photo-controls">
+            <div class="file-btn-wrap">
+              <label for="memberPhotoFileInput" class="btn secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Subir foto desde archivo
+              </label>
+              <input type="file" id="memberPhotoFileInput" accept="image/*" style="display:none;">
+            </div>
+
+            <div class="url-input-row">
+              <input type="text" id="memberPhotoUrlInput" placeholder="O pegar enlace directo de imagen (URL)...">
+              <button id="loadUrlPhotoBtn" class="btn small">Cargar</button>
+            </div>
+
+            <button id="removePhotoBtn" class="btn text-danger small">
+              🗑️ Quitar foto actual
+            </button>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <form id="memberForm" class="member-form">
+          <input type="hidden" id="formMemberId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formName">Nombre de pila *</label>
+              <input type="text" id="formName" required placeholder="Ej: CARLOS">
+            </div>
+            <div class="form-group">
+              <label for="formFullName">Nombre completo</label>
+              <input type="text" id="formFullName" placeholder="Ej: Carlos Reyna Aliaga">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formBranch">Rama Familiar</label>
+              <select id="formBranch">
+                <!-- Opciones de rama -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formGeneration">Generación</label>
+              <select id="formGeneration">
+                <option value="1">Gen 1: Patriarcas</option>
+                <option value="2">Gen 2: Hijos</option>
+                <option value="3">Gen 3: Nietos</option>
+                <option value="4">Gen 4: Bisnietos</option>
+                <option value="5">Gen 5: Tataranietos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formRole">Rol / Parentesco</label>
+              <input type="text" id="formRole" placeholder="Ej: Nieto, Cónyuge, Bisnieto">
+            </div>
+            <div class="form-group">
+              <label for="formBadge">Distinción / Título especial</label>
+              <input type="text" id="formBadge" placeholder="Ej: Sacerdote">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formGender">Género</label>
+              <select id="formGender">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formSpouse">Cónyuge / Pareja</label>
+              <select id="formSpouse">
+                <option value="">(Ninguno / Soltero)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formParent">Progenitor / Padre o Madre</label>
+            <select id="formParent">
+              <option value="">(Ninguno / Raíz)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="formNotes">Notas biográficas / Recuerdos</label>
+            <textarea id="formNotes" rows="3" placeholder="Información adicional sobre este integrante..."></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button id="deleteMemberBtn" class="btn text-danger">Eliminar Integrante</button>
+        <div class="footer-right">
+          <button id="cancelModalBtn" class="btn secondary">Cancelar</button>
+          <button id="saveMemberBtn" class="btn primary">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help & Shortcuts Modal -->
+  <div id="helpModal" class="modal-backdrop">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Guía de Uso y Atajos</h2>
+        <button id="helpModalCloseBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body help-content">
+        <h4>📸 ¿Cómo agregar la foto de la cara de cada integrante?</h4>
+        <ol>
+          <li><strong>Arrastrar y soltar:</strong> Arrastra cualquier foto directamente sobre la tarjeta de la persona en el árbol.</li>
+          <li><strong>Clic en la tarjeta:</strong> Haz clic en cualquier persona para abrir su ficha completa y selecciona <em>"Subir foto desde archivo"</em>.</li>
+          <li><strong>Desde el Directorio:</strong> En la pestaña <em>"Directorio"</em> puedes filtrar <em>"Solo personas sin foto"</em> para ir completando una por una.</li>
+        </ol>
+
+        <h4>🧭 Navegación por el Árbol Panorámico</h4>
+        <ul>
+          <li><strong>Moverse / Pan:</strong> Haz clic y arrastra sobre cualquier parte libre del fondo, o usa el mini-mapa abajo a la derecha.</li>
+          <li><strong>Zoom:</strong> Rueda del ratón, pellizco en trackpad o los botones <code>+</code> y <code>-</code>.</li>
+          <li><strong>Buscar:</strong> Escribe en el buscador superior para viajar instantáneamente a cualquier integrante.</li>
+        </ul>
+
+        <h4>💾 Guardado y Respaldo</h4>
+        <p>Todos los cambios y fotos se guardan automáticamente en tu navegador. Puedes pulsar <strong>Opciones &gt; Exportar Respaldo (JSON)</strong> para descargar una copia de seguridad con todas las fotos incluidas.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="closeHelpModalBtn" class="btn primary">¡Entendido!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast-notification"></div>
+
+  <!-- Script tags -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
