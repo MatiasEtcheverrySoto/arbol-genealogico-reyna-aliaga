@@ -222,8 +222,9 @@
       let count = 0;
 
       for (const m of familyData.members) {
+        const clean = JSON.parse(JSON.stringify(m));
         const docRef = colRef.doc(m.id);
-        batch.set(docRef, m);
+        batch.set(docRef, clean);
         count++;
         if (count % batchSize === 0) {
           await batch.commit();
@@ -242,9 +243,14 @@
 
   function saveMemberToCloud(member) {
     if (!isCloudActive || !firestoreDb) return;
-    firestoreDb.collection('families').doc('reyna_aliaga').collection('members')
-      .doc(member.id).set(member, { merge: true })
-      .catch(err => console.error('Error guardando en Firestore:', err));
+    try {
+      const clean = JSON.parse(JSON.stringify(member));
+      firestoreDb.collection('families').doc('reyna_aliaga').collection('members')
+        .doc(member.id).set(clean, { merge: true })
+        .catch(err => console.error('Error guardando en Firestore:', err));
+    } catch (err) {
+      console.error('Error serializando miembro para Firestore:', err);
+    }
   }
 
   function deleteMemberFromCloud(memberId) {
