@@ -199,13 +199,16 @@
 
       if (cloudMembers.length > 0) {
         familyData.members = cloudMembers;
+        const wasRepaired = sanitizeAndRepairData(familyData);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(familyData));
-        renderAll();
-        if (initialLoadDone) {
-          showToast('☁️ Árbol actualizado por un familiar en tiempo real.');
-        } else {
-          showToast(`☁️ Nube conectada: ${cloudMembers.length} integrantes cargados.`);
+        if (wasRepaired) {
+          const syncKeys = ['rodrigo_g', 'matias_g', 'carolina_g', 'guadalupe_g', 'victoria_g', 'tomas_rodrigo_g'];
+          syncKeys.forEach(k => {
+            const m = getMember(k);
+            if (m) saveMemberToCloud(m);
+          });
         }
+        renderAll();
       }
       initialLoadDone = true;
     }, err => {
@@ -332,6 +335,7 @@
   // --- INITIALIZATION ---
   function init() {
     try { loadData(); } catch (e) { console.error('loadData error:', e); }
+    try { sanitizeAndRepairData(familyData); } catch (e) { console.error('sanitize error:', e); }
     try { populateFormBranchOptions(); } catch (e) { console.error('populateFormBranchOptions error:', e); }
     try { bindEvents(); } catch (e) { console.error('bindEvents error:', e); }
     try { renderAll(); } catch (e) { console.error('renderAll error:', e); }
@@ -380,11 +384,15 @@
             console.warn('Migración de fotos previa:', migErr);
           }
         }
+      }
+      const wasRepaired = sanitizeAndRepairData(familyData);
+      if (wasRepaired) {
         saveData();
       }
     } catch (e) {
       console.error('Error loading data from localStorage, using default:', e);
       familyData = JSON.parse(JSON.stringify(FAMILY_TREE_DATA));
+      sanitizeAndRepairData(familyData);
     }
   }
 
@@ -443,6 +451,242 @@
     return role || '';
   }
 
+  function formatToTitleCase(str) {
+    if (!str) return '';
+    return str.split(/\s+/).map(word => {
+      if (!word) return '';
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
+  }
+
+  function getMemberSurnames(member) {
+    if (!member || !member.fullName) return '';
+    const fn = member.fullName.trim();
+    const n = (member.name || '').trim();
+    if (!n) return '';
+
+    if (fn.toLowerCase().startsWith(n.toLowerCase())) {
+      const remainder = fn.slice(n.length).trim();
+      if (remainder) return remainder;
+    }
+
+    const nameParts = n.split(/\s+/).filter(Boolean);
+    const fullParts = fn.split(/\s+/).filter(Boolean);
+    if (fullParts.length > nameParts.length) {
+      return fullParts.slice(nameParts.length).join(' ');
+    } else if (fullParts.length > 1) {
+      return fullParts.slice(1).join(' ');
+    }
+    return '';
+  }
+
+  function getPrimarySurname(member) {
+    if (!member) return '';
+    const surnames = getMemberSurnames(member);
+    if (!surnames) return '';
+    const parts = surnames.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '';
+    if (parts.length === 1) return parts[0];
+
+    const lower0 = parts[0].toLowerCase();
+    if (lower0 === 'de' && parts.length >= 3 && ['la', 'los', 'las'].includes(parts[1].toLowerCase())) {
+      return `${parts[0]} ${parts[1]} ${parts[2]}`;
+    }
+    if (['de', 'del', 'san', 'santa'].includes(lower0) && parts.length >= 2) {
+      return `${parts[0]} ${parts[1]}`;
+    }
+    return parts[0];
+  }
+
+  function inferChildSurnames(parentId1, parentId2) {
+    const p1 = parentId1 ? getMember(parentId1) : null;
+    const p2 = parentId2 ? getMember(parentId2) : null;
+    if (!p1 && !p2) return '';
+
+    let father = null;
+    let mother = null;
+
+    if (p1 && p2) {
+      if (p1.gender === 'M' && p2.gender === 'F') {
+        father = p1;
+        mother = p2;
+      } else if (p2.gender === 'M' && p1.gender === 'F') {
+        father = p2;
+        mother = p1;
+      } else {
+        father = p1;
+        mother = p2;
+      }
+    } else {
+      const singleParent = p1 || p2;
+      return getPrimarySurname(singleParent);
+    }
+
+    const fatherSur = getPrimarySurname(father);
+    const motherSur = getPrimarySurname(mother);
+
+    if (fatherSur && motherSur) {
+      return `${fatherSur} ${motherSur}`;
+    }
+    return fatherSur || motherSur || '';
+  }
+
+  // --- HIERARCHY & GRAPH INTEGRITY UTILITIES ---
+  function getAllDescendantIds(rootId, membersList = familyData.members) {
+    if (!rootId || !membersList) return new Set();
+    const descendants = new Set();
+    const queue = [rootId];
+
+    const rootMember = membersList.find(m => m.id === rootId);
+    if (rootMember && rootMember.spouseId) {
+      queue.push(rootMember.spouseId);
+    }
+
+    const processed = new Set();
+    while (queue.length > 0) {
+      const currentParentId = queue.shift();
+      if (processed.has(currentParentId)) continue;
+      processed.add(currentParentId);
+
+      membersList.forEach(m => {
+        if (m.parentId === currentParentId && !descendants.has(m.id)) {
+          descendants.add(m.id);
+          queue.push(m.id);
+          if (m.spouseId && !descendants.has(m.spouseId)) {
+            queue.push(m.spouseId);
+          }
+        }
+      });
+    }
+    return descendants;
+  }
+
+  function sanitizeAndRepairData(data) {
+    if (!data || !Array.isArray(data.members)) return false;
+    let modified = false;
+
+    // A. Reparación explícita para la familia Rodrigo Etcheverry Reyna & Matías Etcheverry Soto
+    const rodrigo = data.members.find(m => m.id === 'rodrigo_g');
+    if (rodrigo) {
+      if (rodrigo.parentId === 'matias_g' || rodrigo.parentId !== 'graciela' || rodrigo.generation !== 3) {
+        console.warn('Restaurando jerarquía canónica de Rodrigo Etcheverry Reyna...');
+        rodrigo.parentId = 'graciela';
+        rodrigo.generation = 3;
+        rodrigo.role = 'Nieto';
+        rodrigo.spouseId = 'carolina_g';
+        rodrigo.branch = 'graciela';
+        modified = true;
+      }
+    }
+
+    const matias = data.members.find(m => m.id === 'matias_g');
+    if (matias) {
+      if (matias.parentId !== 'rodrigo_g' || matias.generation !== 4) {
+        console.warn('Restaurando jerarquía canónica de Matías Etcheverry Soto...');
+        matias.parentId = 'rodrigo_g';
+        matias.generation = 4;
+        matias.role = 'Bisnieto';
+        matias.branch = 'graciela';
+        modified = true;
+      }
+    }
+
+    const carolina = data.members.find(m => m.id === 'carolina_g');
+    if (carolina) {
+      if (carolina.spouseId !== 'rodrigo_g' || carolina.generation !== 3) {
+        carolina.spouseId = 'rodrigo_g';
+        carolina.generation = 3;
+        carolina.branch = 'graciela';
+        modified = true;
+      }
+    }
+
+    const hijosRodrigo = ['guadalupe_g', 'victoria_g', 'tomas_rodrigo_g'];
+    hijosRodrigo.forEach(id => {
+      const hijo = data.members.find(m => m.id === id);
+      if (hijo && (hijo.parentId !== 'rodrigo_g' || hijo.generation !== 4)) {
+        hijo.parentId = 'rodrigo_g';
+        hijo.generation = 4;
+        hijo.branch = 'graciela';
+        modified = true;
+      }
+    });
+
+    // B. Detección y ruptura genérica de ciclos genealógicos (A -> B -> A o bucles n-arios)
+    data.members.forEach(member => {
+      if (!member.parentId) return;
+
+      const visited = new Set([member.id]);
+      let currentId = member.parentId;
+      let cycleDetected = false;
+
+      while (currentId) {
+        if (visited.has(currentId)) {
+          cycleDetected = true;
+          break;
+        }
+        visited.add(currentId);
+        const parentMember = data.members.find(m => m.id === currentId);
+        currentId = parentMember ? parentMember.parentId : null;
+      }
+
+      if (cycleDetected) {
+        console.warn(`Ciclo cerrado detectado en ${member.name} (${member.id}). Reparando automáticamente...`);
+        const baseMember = typeof FAMILY_TREE_DATA !== 'undefined'
+          ? FAMILY_TREE_DATA.members.find(m => m.id === member.id)
+          : null;
+
+        if (baseMember && baseMember.parentId) {
+          member.parentId = baseMember.parentId;
+          member.generation = baseMember.generation;
+          member.role = baseMember.role;
+          member.branch = baseMember.branch;
+        } else {
+          member.parentId = null;
+        }
+        modified = true;
+      }
+    });
+
+    // C. Coherencia de Generación y Rama respecto al Padre
+    data.members.forEach(member => {
+      if (!member.parentId) return;
+      const parent = data.members.find(m => m.id === member.parentId);
+      if (parent && parent.generation) {
+        const expectedGen = parent.generation + 1;
+        if (!member.role?.includes('Cónyuge') && member.generation !== expectedGen && expectedGen <= 5) {
+          member.generation = expectedGen;
+          if (expectedGen === 3) member.role = member.gender === 'F' ? 'Nieta' : 'Nieto';
+          else if (expectedGen === 4) member.role = member.gender === 'F' ? 'Bisnieta' : 'Bisnieto';
+          else if (expectedGen === 5) member.role = member.gender === 'F' ? 'Tataranieta' : 'Tataranieto';
+          modified = true;
+        }
+        if (parent.branch && member.branch !== parent.branch) {
+          member.branch = parent.branch;
+          modified = true;
+        }
+      }
+    });
+
+    // D. Coherencia recíproca de cónyuge
+    data.members.forEach(member => {
+      if (member.spouseId) {
+        if (member.spouseId === member.id || member.spouseId === member.parentId) {
+          member.spouseId = null;
+          modified = true;
+        } else {
+          const spouse = data.members.find(m => m.id === member.spouseId);
+          if (spouse && spouse.spouseId !== member.id) {
+            spouse.spouseId = member.id;
+            modified = true;
+          }
+        }
+      }
+    });
+
+    return modified;
+  }
+
   // --- EVENT BINDING ---
   function bindEvents() {
     // Canvas Pan & Zoom
@@ -490,14 +734,28 @@
 
     canvasViewport.addEventListener('touchend', () => { isDragging = false; });
 
-    // HUD Zoom controls
-    document.getElementById('zoomInBtn').addEventListener('click', () => zoomBy(1.2));
-    document.getElementById('zoomOutBtn').addEventListener('click', () => zoomBy(0.8));
-    document.getElementById('fitScreenBtn').addEventListener('click', fitTreeToScreen);
-    document.getElementById('resetViewBtn').addEventListener('click', centerTreeOnPatriarchs);
-    canvasHelpBtn.addEventListener('click', () => helpModal.classList.add('active'));
-    helpModalCloseBtn.addEventListener('click', () => helpModal.classList.remove('active'));
-    closeHelpModalBtn.addEventListener('click', () => helpModal.classList.remove('active'));
+    // HUD Zoom & Action controls
+    const zoomInEl = document.getElementById('zoomInBtn');
+    if (zoomInEl) zoomInEl.addEventListener('click', () => zoomBy(1.2));
+    const zoomOutEl = document.getElementById('zoomOutBtn');
+    if (zoomOutEl) zoomOutEl.addEventListener('click', () => zoomBy(0.8));
+
+    const reportErrorBtn = document.getElementById('reportErrorBtn');
+    if (reportErrorBtn) reportErrorBtn.addEventListener('click', openReportErrorModal);
+
+    if (canvasHelpBtn) canvasHelpBtn.addEventListener('click', () => helpModal.classList.add('active'));
+    if (helpModalCloseBtn) helpModalCloseBtn.addEventListener('click', () => helpModal.classList.remove('active'));
+    if (closeHelpModalBtn) closeHelpModalBtn.addEventListener('click', () => helpModal.classList.remove('active'));
+
+    // Report Error Modal bindings
+    const reportErrorModalCloseBtn = document.getElementById('reportErrorModalCloseBtn');
+    if (reportErrorModalCloseBtn) reportErrorModalCloseBtn.addEventListener('click', closeReportErrorModal);
+    const cancelReportBtn = document.getElementById('cancelReportBtn');
+    if (cancelReportBtn) cancelReportBtn.addEventListener('click', closeReportErrorModal);
+    const submitReportBtn = document.getElementById('submitReportBtn');
+    if (submitReportBtn) submitReportBtn.addEventListener('click', submitReportError);
+    const reportWhatsappBtn = document.getElementById('reportWhatsappBtn');
+    if (reportWhatsappBtn) reportWhatsappBtn.addEventListener('click', sendReportViaWhatsapp);
 
     // View Switching
     document.querySelectorAll('.view-btn').forEach(btn => {
@@ -571,6 +829,22 @@
       memberForm.addEventListener('submit', (e) => {
         e.preventDefault();
         saveModalMember();
+      });
+    }
+
+    const formFirstNameInput = document.getElementById('formFirstName');
+    if (formFirstNameInput) {
+      formFirstNameInput.addEventListener('input', () => {
+        if (!currentModalPhoto) {
+          renderModalPhotoPreview(null, formFirstNameInput.value || 'Nuevo');
+        }
+      });
+    }
+
+    const formLastNameInput = document.getElementById('formLastName');
+    if (formLastNameInput) {
+      formLastNameInput.addEventListener('input', () => {
+        formLastNameInput.dataset.autoInferred = 'false';
       });
     }
 
@@ -662,7 +936,9 @@
     });
 
     // Mini-map drag/click
-    miniMapContainer.addEventListener('mousedown', onMiniMapClick);
+    if (miniMapContainer) {
+      miniMapContainer.addEventListener('mousedown', onMiniMapClick);
+    }
 
     // Directory filter
     missingPhotoOnlyCheckbox.addEventListener('change', renderDirectoryView);
@@ -945,6 +1221,8 @@
   }
 
   function renderStandardBranchDescendants(container, branchId) {
+    const renderedInBranch = new Set();
+
     // Group Gen 3 members into couples or singles, sorted oldest to youngest
     const gen3All = familyData.members.filter(m => m.branch === branchId && m.generation === 3);
     const bloodlineGen3 = sortMembersByAge(gen3All.filter(m => !m.role?.includes('Cónyuge')));
@@ -965,12 +1243,14 @@
       coupleDiv.className = 'couple-group';
       coupleDiv.appendChild(createMemberCard(m));
       renderedGen3.add(m.id);
+      renderedInBranch.add(m.id);
 
       if (m.spouseId) {
         const spouse = getMember(m.spouseId);
         if (spouse && spouse.branch === branchId) {
           coupleDiv.appendChild(createMemberCard(spouse));
           renderedGen3.add(spouse.id);
+          renderedInBranch.add(spouse.id);
         }
       }
       groupContainer.appendChild(coupleDiv);
@@ -982,6 +1262,7 @@
         const kidsRow = document.createElement('div');
         kidsRow.className = 'children-row';
         sortedChildren.forEach(child => {
+          renderedInBranch.add(child.id);
           // If child has children (Gen 5)
           const grandKids = familyData.members.filter(gc => gc.parentId === child.id || (child.spouseId && gc.parentId === child.spouseId));
           if (grandKids.length > 0) {
@@ -996,7 +1277,10 @@
             childCouple.appendChild(createMemberCard(child, true));
             if (child.spouseId) {
               const chSpouse = getMember(child.spouseId);
-              if (chSpouse) childCouple.appendChild(createMemberCard(chSpouse, true));
+              if (chSpouse) {
+                childCouple.appendChild(createMemberCard(chSpouse, true));
+                renderedInBranch.add(chSpouse.id);
+              }
             }
             subWrap.appendChild(childCouple);
 
@@ -1004,6 +1288,7 @@
             gkRow.className = 'children-row';
             const sortedGrandKids = sortMembersByAge(grandKids);
             sortedGrandKids.forEach(gk => {
+              renderedInBranch.add(gk.id);
               gkRow.appendChild(createMemberCard(gk, true));
             });
             subWrap.appendChild(gkRow);
@@ -1017,6 +1302,29 @@
 
       gen3Row.appendChild(groupContainer);
     });
+
+    // RESILIENCIA: Comprobar si hay integrantes de esta rama (Gen 3+) que no fueron alcanzados por la jerarquía
+    const unrenderedBranchMembers = familyData.members.filter(m =>
+      m.branch === branchId &&
+      m.generation >= 3 &&
+      !renderedInBranch.has(m.id)
+    );
+
+    if (unrenderedBranchMembers.length > 0) {
+      const unrenderedGroup = document.createElement('div');
+      unrenderedGroup.className = 'branch-couples-wrap';
+      unrenderedGroup.style.border = '1px dashed var(--border-color)';
+      unrenderedGroup.style.borderRadius = '12px';
+      unrenderedGroup.style.padding = '0.5rem';
+
+      const unrenderedRow = document.createElement('div');
+      unrenderedRow.className = 'couple-group';
+      sortMembersByAge(unrenderedBranchMembers).forEach(um => {
+        unrenderedRow.appendChild(createMemberCard(um, true));
+      });
+      unrenderedGroup.appendChild(unrenderedRow);
+      gen3Row.appendChild(unrenderedGroup);
+    }
 
     container.appendChild(gen3Row);
   }
@@ -1378,6 +1686,7 @@
 
   // --- MINI-MAP IMPLEMENTATION ---
   function updateMiniMap() {
+    if (!miniMapCanvas || !miniMapLens || !miniMapContainer) return;
     if (currentView !== 'tree') return;
 
     const ctx = miniMapCanvas.getContext('2d');
@@ -1425,6 +1734,7 @@
   }
 
   function onMiniMapClick(e) {
+    if (!miniMapContainer || !miniMapCanvas) return;
     const rect = miniMapContainer.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
@@ -1540,9 +1850,40 @@
 
     // Form fields
     document.getElementById('formMemberId').value = member.id;
-    document.getElementById('formName').value = member.name;
-    document.getElementById('formFullName').value = member.fullName || '';
-    document.getElementById('formGender').value = member.gender || 'M';
+    let firstName = '';
+    let lastName = '';
+    const rawName = (member.name || '').trim();
+    const full = (member.fullName || '').trim();
+
+    if (full) {
+      if (rawName && full.toLowerCase().startsWith(rawName.toLowerCase())) {
+        firstName = full.slice(0, rawName.length).trim();
+        lastName = full.slice(rawName.length).trim();
+      } else {
+        const rawWords = rawName.split(/\s+/).filter(Boolean);
+        const fullWords = full.split(/\s+/).filter(Boolean);
+        if (fullWords.length > rawWords.length && rawWords.length > 0) {
+          firstName = fullWords.slice(0, rawWords.length).join(' ');
+          lastName = fullWords.slice(rawWords.length).join(' ');
+        } else {
+          firstName = full;
+          lastName = '';
+        }
+      }
+    } else {
+      firstName = formatToTitleCase(rawName);
+      lastName = '';
+    }
+
+    const firstNameInput = document.getElementById('formFirstName');
+    const lastNameInput = document.getElementById('formLastName');
+    if (firstNameInput) firstNameInput.value = firstName;
+    if (lastNameInput) {
+      lastNameInput.value = lastName;
+      lastNameInput.dataset.autoInferred = 'false';
+    }
+    const genderEl = document.getElementById('formGender');
+    if (genderEl) genderEl.value = member.gender || 'M';
 
     // Generación y Rol unificados
     const genRoleSelect = document.getElementById('formGenerationRole');
@@ -1587,9 +1928,9 @@
     // Set initial selection
     hidden.value = selectedId || '';
     if (selectedId) {
-      const selectedItem = options.find(o => o.id === selectedId);
+      const selectedItem = options.find(o => o.id === selectedId || (o.spouseId && o.spouseId === selectedId));
       input.value = selectedItem ? selectedItem.displayName : '';
-      clearBtn.style.display = 'block';
+      clearBtn.style.display = selectedItem ? 'block' : 'none';
     } else {
       input.value = '';
       clearBtn.style.display = 'none';
@@ -1611,7 +1952,7 @@
 
       const filtered = options.filter(opt => {
         if (!filterLower) return true;
-        const text = `${opt.name} ${opt.fullName || ''} ${opt.branchName || ''}`.toLowerCase();
+        const text = `${opt.name} ${opt.fullName || ''} ${opt.spouseName || ''} ${opt.displayName || ''} ${opt.branchName || ''}`.toLowerCase();
         return text.includes(filterLower);
       });
 
@@ -1624,13 +1965,14 @@
       }
 
       filtered.forEach(opt => {
+        const isSelected = hidden.value === opt.id || (opt.spouseId && hidden.value === opt.spouseId);
         const item = document.createElement('div');
-        item.className = `combobox-item ${hidden.value === opt.id ? 'selected' : ''}`;
+        item.className = `combobox-item ${isSelected ? 'selected' : ''}`;
 
         const avatar = document.createElement('span');
         avatar.className = 'combobox-item-avatar';
         avatar.style.backgroundColor = opt.branchColor || '#722F37';
-        avatar.textContent = getInitials(opt.name);
+        avatar.textContent = opt.avatarText || getInitials(opt.name);
         item.appendChild(avatar);
 
         const info = document.createElement('div');
@@ -1698,7 +2040,7 @@
       setTimeout(() => {
         menu.classList.remove('active');
         if (hidden.value) {
-          const opt = options.find(o => o.id === hidden.value);
+          const opt = options.find(o => o.id === hidden.value || (o.spouseId && o.spouseId === hidden.value));
           if (opt) input.value = opt.displayName;
         } else {
           input.value = '';
@@ -1721,13 +2063,18 @@
       return nameA.localeCompare(nameB);
     });
 
+    const descendantIds = currentMember.id ? getAllDescendantIds(currentMember.id) : new Set();
     const spouseOptions = [];
     const parentOptions = [];
+    const processedCouples = new Set();
 
+    // 1. Opciones de cónyuge
     sorted.forEach(m => {
       if (currentMember.id && m.id === currentMember.id) return;
-      const br = getBranch(m.branch);
+      const isDescendant = currentMember.id && descendantIds.has(m.id);
+      if (isDescendant) return;
 
+      const br = getBranch(m.branch);
       spouseOptions.push({
         id: m.id,
         name: m.name,
@@ -1739,19 +2086,77 @@
         role: m.role,
         displayName: m.fullName || m.name
       });
-
-      parentOptions.push({
-        id: m.id,
-        name: m.name,
-        fullName: m.fullName,
-        branch: m.branch,
-        branchName: br.name,
-        branchColor: br.color,
-        generation: m.generation,
-        role: m.role,
-        displayName: m.fullName || m.name
-      });
     });
+
+    // 2. Opciones de padres: mostrar las parejas de progenitores juntas
+    sorted.forEach(m => {
+      // Regla estricta: los padres no pueden ser uno mismo ni un descendiente
+      if (currentMember.id && (m.id === currentMember.id || descendantIds.has(m.id))) return;
+
+      // Validación de generación: los padres no pueden ser de igual o posterior generación
+      const isInvalidParentGen = currentMember.generation && !currentMember.role?.includes('Cónyuge') && m.generation >= currentMember.generation;
+      if (isInvalidParentGen) return;
+
+      const spouse = m.spouseId ? familyData.members.find(s => s.id === m.spouseId) : null;
+
+      // Si el cónyuge es el integrante actual o un descendiente, tampoco califica la pareja
+      if (spouse && currentMember.id && (spouse.id === currentMember.id || descendantIds.has(spouse.id))) {
+        return;
+      }
+
+      if (spouse) {
+        // Llave única para la pareja (evita duplicar "A & B" y "B & A")
+        const coupleKey = [m.id, spouse.id].sort().join('___');
+        if (processedCouples.has(coupleKey)) return;
+        processedCouples.add(coupleKey);
+
+        // Colocar primero al integrante de la rama/linaje directo
+        const isSpouseRole = m.role && m.role.includes('Cónyuge');
+        const primary = isSpouseRole ? spouse : m;
+        const partner = isSpouseRole ? m : spouse;
+
+        const br = getBranch(primary.branch || partner.branch);
+        const primaryName = primary.fullName || primary.name;
+        const partnerName = partner.fullName || partner.name;
+        const coupleDisplayName = `${primaryName} & ${partnerName}`;
+
+        parentOptions.push({
+          id: primary.id,
+          spouseId: partner.id,
+          name: `${primary.name} & ${partner.name}`,
+          fullName: coupleDisplayName,
+          displayName: coupleDisplayName,
+          spouseName: partnerName,
+          branch: primary.branch || partner.branch,
+          branchName: br.name,
+          branchColor: br.color,
+          generation: primary.generation || partner.generation,
+          role: 'Pareja Progenitora',
+          avatarText: '👥'
+        });
+      } else {
+        // Progenitor individual sin cónyuge
+        const br = getBranch(m.branch);
+        const dispName = m.fullName || m.name;
+        parentOptions.push({
+          id: m.id,
+          spouseId: null,
+          name: m.name,
+          fullName: dispName,
+          displayName: dispName,
+          spouseName: '',
+          branch: m.branch,
+          branchName: br.name,
+          branchColor: br.color,
+          generation: m.generation,
+          role: m.role,
+          avatarText: getInitials(m.name)
+        });
+      }
+    });
+
+    // Ordenar padres alfabéticamente por nombre de la pareja
+    parentOptions.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     setupSearchableCombobox({
       inputId: 'formSpouseSearch',
@@ -1801,6 +2206,27 @@
             const br = getBranch(parent.branch);
             modalBranchTag.textContent = br.name;
             modalBranchTag.style.backgroundColor = br.color;
+          }
+
+          // Auto-completar apellidos según progenitores elegidos
+          const lastNameInput = document.getElementById('formLastName');
+          if (lastNameInput) {
+            const isAuto = lastNameInput.dataset.autoInferred === 'true';
+            const isEmpty = !lastNameInput.value.trim();
+            if (isEmpty || isAuto) {
+              const inferred = inferChildSurnames(opt.id, opt.spouseId);
+              if (inferred) {
+                lastNameInput.value = inferred;
+                lastNameInput.dataset.autoInferred = 'true';
+              }
+            }
+          }
+        } else {
+          // Si quita la selección y el apellido fue auto-inferido, limpiarlo si es nuevo
+          const lastNameInput = document.getElementById('formLastName');
+          if (lastNameInput && lastNameInput.dataset.autoInferred === 'true' && !activeMemberId) {
+            lastNameInput.value = '';
+            lastNameInput.dataset.autoInferred = 'false';
           }
         }
       }
@@ -1861,7 +2287,7 @@
     try {
       showToast('⏳ Optimizando fotografía...');
       currentModalPhoto = await compressImageFile(file);
-      renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
+      renderModalPhotoPreview(currentModalPhoto, document.getElementById('formFirstName')?.value || 'Foto');
       showToast('📸 Foto lista y optimizada. Recuerda pulsar "Guardar Cambios".');
     } catch (err) {
       console.error(err);
@@ -1880,7 +2306,7 @@
             const reader = new FileReader();
             reader.onload = (evt) => {
               currentModalPhoto = evt.target.result;
-              renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
+              renderModalPhotoPreview(currentModalPhoto, document.getElementById('formFirstName')?.value || 'Foto');
               showToast('📋 ¡Foto pegada desde el portapapeles!');
             };
             reader.readAsDataURL(blob);
@@ -1909,7 +2335,7 @@
           const reader = new FileReader();
           reader.onload = (evt) => {
             currentModalPhoto = evt.target.result;
-            renderModalPhotoPreview(currentModalPhoto, document.getElementById('formName').value || 'Foto');
+            renderModalPhotoPreview(currentModalPhoto, document.getElementById('formFirstName')?.value || 'Foto');
             showToast('📋 ¡Foto pegada desde el portapapeles!');
           };
           reader.readAsDataURL(file);
@@ -1920,13 +2346,50 @@
   }
 
   function saveModalMember() {
-    const rawName = document.getElementById('formName').value.trim();
-    if (!rawName) {
-      alert('Por favor escribe al menos el nombre de pila de la persona.');
+    const firstName = (document.getElementById('formFirstName')?.value || '').trim();
+    const lastName = (document.getElementById('formLastName')?.value || '').trim();
+    if (!firstName) {
+      alert('Por favor escribe al menos el nombre de la persona.');
+      document.getElementById('formFirstName')?.focus();
       return;
     }
 
     let id = document.getElementById('formMemberId').value;
+    const parentId = document.getElementById('formParent').value || null;
+    const spouseId = document.getElementById('formSpouse').value || null;
+
+    // VALIDACIÓN ESTRICTA DE JERARQUÍA Y PREVENCIÓN DE CICLOS
+    if (id) {
+      if (parentId === id) {
+        alert('⚠️ Error: Un integrante familiar no puede ser su propio padre o madre.');
+        return;
+      }
+      if (spouseId === id) {
+        alert('⚠️ Error: Un integrante familiar no puede ser su propio cónyuge.');
+        return;
+      }
+      if (parentId && spouseId && parentId === spouseId) {
+        alert('⚠️ Error: El cónyuge no puede ser a la vez el padre o madre del integrante.');
+        return;
+      }
+      if (parentId) {
+        const descendantIds = getAllDescendantIds(id);
+        if (descendantIds.has(parentId)) {
+          const p = getMember(parentId);
+          const pName = p ? (p.fullName || p.name) : 'este integrante';
+          alert(`⚠️ Error de jerarquía familiar:\n\nNo puedes asignar a ${pName} como padre/madre porque es un descendiente (hijo, nieto, etc.) de ${firstName}.\n\nAsignarlo crearía una referencia circular y desconectaría a la familia del árbol.`);
+          return;
+        }
+      }
+      if (spouseId) {
+        const descendantIds = getAllDescendantIds(id);
+        if (descendantIds.has(spouseId)) {
+          alert('⚠️ Error: No puedes asignar a un descendiente como cónyuge.');
+          return;
+        }
+      }
+    }
+
     let member = id ? getMember(id) : null;
 
     const isNew = !member;
@@ -1936,12 +2399,10 @@
       familyData.members.push(member);
     }
 
-    member.name = rawName.toUpperCase();
-    member.fullName = document.getElementById('formFullName').value.trim();
-    member.gender = document.getElementById('formGender').value || 'M';
-
-    const parentId = document.getElementById('formParent').value || null;
-    const spouseId = document.getElementById('formSpouse').value || null;
+    member.name = firstName.toUpperCase();
+    member.fullName = lastName ? `${firstName} ${lastName}` : firstName;
+    const genderEl = document.getElementById('formGender');
+    member.gender = genderEl ? genderEl.value : (member.gender || 'M');
     member.parentId = parentId;
     member.spouseId = spouseId;
 
@@ -2042,9 +2503,22 @@
     if (modalQuickActions) modalQuickActions.style.display = 'none';
 
     document.getElementById('formMemberId').value = '';
-    document.getElementById('formName').value = preset.name || '';
-    document.getElementById('formFullName').value = preset.fullName || '';
-    document.getElementById('formGender').value = preset.gender || 'M';
+    const firstNameInput = document.getElementById('formFirstName');
+    const lastNameInput = document.getElementById('formLastName');
+    if (firstNameInput) firstNameInput.value = preset.firstName || preset.name || '';
+
+    let initialLastName = preset.lastName || '';
+    if (!initialLastName && preset.parentId) {
+      const p = getMember(preset.parentId);
+      const spouseId = p ? p.spouseId : null;
+      initialLastName = inferChildSurnames(preset.parentId, spouseId);
+      if (lastNameInput) lastNameInput.dataset.autoInferred = 'true';
+    } else {
+      if (lastNameInput) lastNameInput.dataset.autoInferred = 'false';
+    }
+    if (lastNameInput) lastNameInput.value = initialLastName;
+    const genderEl = document.getElementById('formGender');
+    if (genderEl) genderEl.value = preset.gender || 'M';
 
     const genRoleSelect = document.getElementById('formGenerationRole');
     if (genRoleSelect) {
@@ -2093,6 +2567,7 @@
         const imported = JSON.parse(loadEvent.target.result);
         if (imported && imported.members && Array.isArray(imported.members)) {
           familyData = imported;
+          sanitizeAndRepairData(familyData);
           saveData();
           renderAll();
           showToast(`✅ Respaldo restaurado: ${familyData.members.length} integrantes cargados.`);
@@ -2179,6 +2654,92 @@
       renderAll();
       showToast('🔄 Árbol restaurado a la versión original de la foto.');
     }
+  }
+
+  // --- REPORT ERROR MODAL LOGIC ---
+  const reportErrorModal = document.getElementById('reportErrorModal');
+
+  function openReportErrorModal() {
+    if (reportErrorModal) {
+      const descEl = document.getElementById('reportDescription');
+      if (descEl) descEl.value = '';
+      const targetEl = document.getElementById('reportTargetMember');
+      if (targetEl) targetEl.value = '';
+      reportErrorModal.classList.add('active');
+    }
+  }
+
+  function closeReportErrorModal() {
+    if (reportErrorModal) reportErrorModal.classList.remove('active');
+  }
+
+  function submitReportError() {
+    const descEl = document.getElementById('reportDescription');
+    const desc = descEl ? descEl.value.trim() : '';
+    if (!desc) {
+      alert('Por favor describe brevemente el error o corrección.');
+      return;
+    }
+
+    const userNameEl = document.getElementById('reportUserName');
+    const userName = (userNameEl && userNameEl.value.trim()) || 'Familiar anónimo';
+    const targetMemberEl = document.getElementById('reportTargetMember');
+    const targetMember = (targetMemberEl && targetMemberEl.value.trim()) || 'General';
+    const reportTypeEl = document.getElementById('reportType');
+    const reportType = reportTypeEl ? reportTypeEl.value : 'datos';
+
+    const reportObj = {
+      id: `rep_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      userName,
+      targetMember,
+      reportType,
+      description: desc
+    };
+
+    // 1. Guardar en localStorage
+    try {
+      const existingReports = JSON.parse(localStorage.getItem('familia_reyna_aliaga_reports') || '[]');
+      existingReports.push(reportObj);
+      localStorage.setItem('familia_reyna_aliaga_reports', JSON.stringify(existingReports));
+    } catch (e) {
+      console.warn('Error guardando reporte en localStorage:', e);
+    }
+
+    // 2. Guardar en Firestore si está conectado
+    if (isCloudActive && firestoreDb) {
+      firestoreDb.collection('families').doc('reyna_aliaga').collection('error_reports')
+        .add(reportObj)
+        .then(() => console.log('Reporte enviado a Firestore'))
+        .catch(err => console.error('Error enviando reporte a Firestore:', err));
+    }
+
+    closeReportErrorModal();
+    showToast('✅ ¡Muchas gracias! Tu reporte ha sido enviado para corregir el árbol.');
+  }
+
+  function sendReportViaWhatsapp() {
+    const descEl = document.getElementById('reportDescription');
+    const desc = descEl ? descEl.value.trim() : '';
+    if (!desc) {
+      alert('Por favor escribe primero la descripción del error o corrección.');
+      return;
+    }
+    const userNameEl = document.getElementById('reportUserName');
+    const userName = (userNameEl && userNameEl.value.trim()) || 'Familiar';
+    const targetMemberEl = document.getElementById('reportTargetMember');
+    const targetMember = (targetMemberEl && targetMemberEl.value.trim()) || 'Árbol general';
+    const reportTypeEl = document.getElementById('reportType');
+    const reportTypeText = reportTypeEl ? reportTypeEl.options[reportTypeEl.selectedIndex].text : 'Corrección';
+
+    const msg = `*Reporte de error - Árbol Familiar Reyna Aliaga*\n\n` +
+      `*De:* ${userName}\n` +
+      `*Familiar:* ${targetMember}\n` +
+      `*Tipo:* ${reportTypeText}\n` +
+      `*Detalle:* ${desc}`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   }
 
   // --- KEYBOARD SHORTCUTS ---

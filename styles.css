@@ -660,18 +660,9 @@ body.theme-dark .hud-btn:hover {
   margin: 0 2px;
 }
 
-/* Mini-Map */
+/* Mini-Map (Oculto) */
 .mini-map-container {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  z-index: 50;
-  cursor: crosshair;
+  display: none !important;
 }
 
 #miniMapCanvas {
@@ -1804,30 +1795,55 @@ body.theme-dark .btn-photo-paste {
   background: rgba(239, 68, 68, 0.08);
 }
 
-/* Help Content */
-.help-content h4 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin: 1rem 0 0.4rem;
+/* Help Content Cards */
+.help-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.help-card-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.help-card-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.help-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.help-card-text strong {
+  display: block;
+  font-size: 0.86rem;
   color: var(--text-main);
+  margin-bottom: 0.15rem;
 }
 
-.help-content h4:first-child {
-  margin-top: 0;
-}
-
-.help-content p, .help-content li {
-  font-size: 0.82rem;
+.help-card-text p {
+  font-size: 0.78rem;
   color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 0.4rem;
+  margin: 0;
+  line-height: 1.35;
 }
 
-.help-content code {
+.help-card-text code {
   background: rgba(0,0,0,0.06);
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 /* Toast */
