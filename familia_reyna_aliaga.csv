@@ -1,4 +1,4 @@
-ID;Nombre;Nombre Completo;Rama;Generacion;Rol;Distincion;Tiene Foto;ID Conyuge;ID Progenitor;Notas
+﻿ID;Nombre;Nombre Completo;Rama Familiar;Generacion;Rol;Distincion;Tiene Foto;Conyuge;Progenitor;Notas
 "carlos_alberto";"CARLOS ALBERTO";"Carlos Alberto Reyna";"Cabezas de Familia";1;"Patriarca";"";SI;"maria_laura";"";"Patriarca de la Familia Reyna Aliaga."
 "maria_laura";"MARÍA LAURA";"María Laura Aliaga de Reyna";"Cabezas de Familia";1;"Matriarca";"";SI;"carlos_alberto";"";"Matriarca de la Familia Reyna Aliaga."
 "graciela";"GRACIELA";"Graciela Reyna Aliaga";"Rama Graciela";2;"Hija";"";NO;"hector";"carlos_alberto";""
@@ -10,7 +10,7 @@ ID;Nombre;Nombre Completo;Rama;Generacion;Rol;Distincion;Tiene Foto;ID Conyuge;I
 "trinidad_g";"TRINIDAD";"Trinidad Etcheverry Nuccio";"Rama Graciela";4;"Bisnieto";"";NO;"";"mateo_g";""
 "juan_g";"JUAN";"Juan Etcheverry Nuccio";"Rama Graciela";4;"Bisnieto";"";NO;"";"mateo_g";""
 "rodrigo_g";"RODRIGO";"Rodrigo Etcheverry Reyna";"Rama Graciela";3;"Nieto";"";NO;"carolina_g";"graciela";""
-"carolina_g";"CAROLINA";"Carolina Soto";"Rama Graciela";3;"Cónyuge Nieto";"";NO;"rodrigo_g";"";""
+"carolina_g";"CAROLINA";"María Carolina Soto";"Rama Graciela";3;"Cónyuge Nieto";"";SI;"rodrigo_g";"";"Esposa de Rodrigo Etcheverry Reyna y madre de Guadalupe, Victoria y Matías."
 "guadalupe_g";"GUADALUPE";"Guadalupe Etcheverry Soto";"Rama Graciela";4;"Bisnieto";"";NO;"";"rodrigo_g";""
 "victoria_g";"VICTORIA";"Victoria Etcheverry Soto";"Rama Graciela";4;"Bisnieto";"";NO;"";"rodrigo_g";""
 "matias_g";"MATÍAS";"Matías Etcheverry Soto";"Rama Graciela";4;"Bisnieto";"";NO;"";"rodrigo_g";""

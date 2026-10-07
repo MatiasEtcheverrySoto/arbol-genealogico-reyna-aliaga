@@ -16,6 +16,7 @@ Aplicación interactiva y digitalización completa del árbol genealógico famil
 ├── assets/                      # Directorio de recursos multimedia
 │   ├── carlos_alberto.jpg       # Retrato demostrativo del patriarca
 │   ├── maria_laura.jpg          # Retrato demostrativo de la matriarca
+│   ├── carolina_soto.jpg        # Fotografía facial de Carolina Soto
 │   └── magnolia_bg.jpg          # Fondo floral texturado inspirado en el póster original
 ├── 20261004_153147.jpg          # Fotografía original del cartel familiar físico
 └── README.md                    # Documentación del proyecto

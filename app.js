@@ -344,10 +344,16 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         familyData = JSON.parse(stored);
-        // Asegurar que integrantes base nuevos (Gaspar, Tomás, Ramiro) se sincronicen
+        // Asegurar que integrantes base nuevos y fotos base se sincronicen
         FAMILY_TREE_DATA.members.forEach(baseM => {
-          if (!familyData.members.some(m => m.id === baseM.id)) {
+          const existing = familyData.members.find(m => m.id === baseM.id);
+          if (!existing) {
             familyData.members.push(JSON.parse(JSON.stringify(baseM)));
+          } else {
+            if (!existing.photo && baseM.photo) existing.photo = baseM.photo;
+            if (baseM.fullName && (!existing.fullName || existing.fullName === existing.name)) {
+              existing.fullName = baseM.fullName;
+            }
           }
         });
       } else {
@@ -804,11 +810,8 @@
     const descendantsWrap = document.createElement('div');
     descendantsWrap.className = 'descendants-wrap';
 
-    // Special layout for tall vertical branch: Fernando
-    if (branch.id === 'fernando') {
-      col.classList.add('vertical-tall');
-      renderFernandoBranchDescendants(descendantsWrap);
-    } else if (branch.id === 'cecilia') {
+    // Descendencia longitudinal (Fernando y demás ramas se organizan a lo largo horizontalmente)
+    if (branch.id === 'cecilia') {
       renderCeciliaBranchDescendants(descendantsWrap);
     } else {
       renderStandardBranchDescendants(descendantsWrap, branch.id);

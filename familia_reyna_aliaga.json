@@ -233,13 +233,14 @@
     {
       "id": "carolina_g",
       "name": "CAROLINA",
-      "fullName": "Carolina Soto",
+      "fullName": "María Carolina Soto",
       "branch": "graciela",
       "generation": 3,
       "gender": "F",
       "role": "Cónyuge Nieto",
       "spouseId": "rodrigo_g",
-      "photo": null
+      "photo": "assets/carolina_soto.jpg",
+      "notes": "Esposa de Rodrigo Etcheverry Reyna y madre de Guadalupe, Victoria y Matías."
     },
     {
       "id": "guadalupe_g",
