@@ -198,16 +198,24 @@
       });
 
       if (cloudMembers.length > 0) {
-        familyData.members = cloudMembers;
-        const wasRepaired = sanitizeAndRepairData(familyData);
+        const canonicalIds = new Set(FAMILY_TREE_DATA.members.map(m => m.id));
+        const userAddedMembers = cloudMembers.filter(m => !canonicalIds.has(m.id));
+        const restoredBaseMembers = FAMILY_TREE_DATA.members.map(baseM => {
+          const cloudM = cloudMembers.find(m => m.id === baseM.id);
+          const restored = JSON.parse(JSON.stringify(baseM));
+          if (cloudM) {
+            if (cloudM.photo) restored.photo = cloudM.photo;
+            if (cloudM.notes) restored.notes = cloudM.notes;
+            if (cloudM.badge !== undefined && cloudM.badge !== null) restored.badge = cloudM.badge;
+            if (cloudM.birthYear) restored.birthYear = cloudM.birthYear;
+            if (cloudM.order !== undefined && cloudM.order !== null) restored.order = cloudM.order;
+            if (cloudM.fullName && cloudM.fullName !== cloudM.name) restored.fullName = cloudM.fullName;
+          }
+          return restored;
+        });
+        familyData.members = [...restoredBaseMembers, ...userAddedMembers];
+        sanitizeAndRepairData(familyData);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(familyData));
-        if (wasRepaired) {
-          const syncKeys = ['rodrigo_g', 'matias_g', 'carolina_g', 'guadalupe_g', 'victoria_g', 'tomas_rodrigo_g'];
-          syncKeys.forEach(k => {
-            const m = getMember(k);
-            if (m) saveMemberToCloud(m);
-          });
-        }
         renderAll();
       }
       initialLoadDone = true;
@@ -353,18 +361,35 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         familyData = JSON.parse(stored);
-        // Asegurar que integrantes base nuevos y fotos base se sincronicen
-        FAMILY_TREE_DATA.members.forEach(baseM => {
-          const existing = familyData.members.find(m => m.id === baseM.id);
-          if (!existing) {
-            familyData.members.push(JSON.parse(JSON.stringify(baseM)));
-          } else {
-            if (!existing.photo && baseM.photo) existing.photo = baseM.photo;
-            if (baseM.fullName && (!existing.fullName || existing.fullName === existing.name)) {
-              existing.fullName = baseM.fullName;
-            }
+        // 1. Identificar integrantes canónicos e integrantes nuevos añadidos por el usuario
+        const canonicalIds = new Set(FAMILY_TREE_DATA.members.map(m => m.id));
+        const userAddedMembers = (familyData.members || []).filter(m => !canonicalIds.has(m.id));
+
+        // 2. Restaurar la estructura, fila (generación), rama y orden original canónico de los integrantes base
+        const restoredBaseMembers = FAMILY_TREE_DATA.members.map(baseM => {
+          const existing = (familyData.members || []).find(m => m.id === baseM.id);
+          const restored = JSON.parse(JSON.stringify(baseM));
+          if (existing) {
+            // Preservar fotos cargadas por el usuario
+            if (existing.photo) restored.photo = existing.photo;
+            // Preservar notas agregadas por el usuario
+            if (existing.notes) restored.notes = existing.notes;
+            // Preservar distinciones/badges
+            if (existing.badge !== undefined && existing.badge !== null) restored.badge = existing.badge;
+            // Preservar año de nacimiento si fue cargado
+            if (existing.birthYear) restored.birthYear = existing.birthYear;
+            // Preservar orden manual si fue cargado
+            if (existing.order !== undefined && existing.order !== null) restored.order = existing.order;
+            // Preservar nombre completo si fue modificado
+            if (existing.fullName && existing.fullName !== existing.name) restored.fullName = existing.fullName;
           }
+          return restored;
         });
+
+        // 3. Reensamblar con el orden canónico exacto inicial de FAMILY_TREE_DATA
+        familyData.members = [...restoredBaseMembers, ...userAddedMembers];
+        familyData.branches = JSON.parse(JSON.stringify(FAMILY_TREE_DATA.branches));
+        familyData.meta = JSON.parse(JSON.stringify(FAMILY_TREE_DATA.meta));
       } else {
         familyData = JSON.parse(JSON.stringify(FAMILY_TREE_DATA));
         // Migrar fotos previas si existen en v2 o v1
@@ -385,14 +410,13 @@
           }
         }
       }
-      const wasRepaired = sanitizeAndRepairData(familyData);
-      if (wasRepaired) {
-        saveData();
-      }
+      sanitizeAndRepairData(familyData);
+      saveData();
     } catch (e) {
       console.error('Error loading data from localStorage, using default:', e);
       familyData = JSON.parse(JSON.stringify(FAMILY_TREE_DATA));
       sanitizeAndRepairData(familyData);
+      saveData();
     }
   }
 
@@ -648,27 +672,7 @@
       }
     });
 
-    // C. Coherencia de Generación y Rama respecto al Padre
-    data.members.forEach(member => {
-      if (!member.parentId) return;
-      const parent = data.members.find(m => m.id === member.parentId);
-      if (parent && parent.generation) {
-        const expectedGen = parent.generation + 1;
-        if (!member.role?.includes('Cónyuge') && member.generation !== expectedGen && expectedGen <= 5) {
-          member.generation = expectedGen;
-          if (expectedGen === 3) member.role = member.gender === 'F' ? 'Nieta' : 'Nieto';
-          else if (expectedGen === 4) member.role = member.gender === 'F' ? 'Bisnieta' : 'Bisnieto';
-          else if (expectedGen === 5) member.role = member.gender === 'F' ? 'Tataranieta' : 'Tataranieto';
-          modified = true;
-        }
-        if (parent.branch && member.branch !== parent.branch) {
-          member.branch = parent.branch;
-          modified = true;
-        }
-      }
-    });
-
-    // D. Coherencia recíproca de cónyuge
+    // C. Coherencia recíproca de cónyuge
     data.members.forEach(member => {
       if (member.spouseId) {
         if (member.spouseId === member.id || member.spouseId === member.parentId) {
@@ -1160,11 +1164,23 @@
     return col;
   }
 
-  // --- AGE & ORDER UTILITIES (DEL MÁS GRANDE AL MÁS CHICO) ---
+  // --- AGE & ORDER UTILITIES (PRESERVACIÓN DE ORDEN CANÓNICO ORIGINAL) ---
+  function getCanonicalMemberIndex(id) {
+    if (typeof FAMILY_TREE_DATA !== 'undefined' && Array.isArray(FAMILY_TREE_DATA.members)) {
+      const idx = FAMILY_TREE_DATA.members.findIndex(m => m.id === id);
+      if (idx !== -1) return idx;
+    }
+    if (familyData && Array.isArray(familyData.members)) {
+      const idx = familyData.members.findIndex(m => m.id === id);
+      if (idx !== -1) return idx + 10000;
+    }
+    return 99999;
+  }
+
   function sortMembersByAge(members) {
     if (!members || !members.length) return [];
     return [...members].sort((a, b) => {
-      // 1. Birth Year (lower year = born earlier = older / más grande)
+      // 1. Año de nacimiento explícito (menor año = más grande / nacido antes)
       const yearA = a.birthYear ? parseInt(a.birthYear, 10) : null;
       const yearB = b.birthYear ? parseInt(b.birthYear, 10) : null;
       const hasYearA = yearA !== null && !isNaN(yearA) && yearA > 0;
@@ -1174,22 +1190,17 @@
         return yearA - yearB;
       }
 
-      // 2. Explicit or sequential order (1 = oldest / primer hijo, 2, 3...)
+      // 2. Orden numérico manual explícito si ambos lo tienen asignado
       const hasOrdA = a.order !== undefined && a.order !== null && a.order !== '';
       const hasOrdB = b.order !== undefined && b.order !== null && b.order !== '';
-      const ordA = hasOrdA ? parseFloat(a.order) : (members.indexOf(a) + 1);
-      const ordB = hasOrdB ? parseFloat(b.order) : (members.indexOf(b) + 1);
-
-      if (ordA !== ordB) {
-        return ordA - ordB;
+      if (hasOrdA && hasOrdB) {
+        const ordA = parseFloat(a.order);
+        const ordB = parseFloat(b.order);
+        if (ordA !== ordB) return ordA - ordB;
       }
 
-      // If one had an explicit order and the other had default index order, explicit order takes priority
-      if (hasOrdA && !hasOrdB) return -1;
-      if (!hasOrdA && hasOrdB) return 1;
-
-      // 3. Fallback: preserve relative position in members array
-      return members.indexOf(a) - members.indexOf(b);
+      // 3. Fallback estricto: preservar la posición canónica original del integrante en data.js
+      return getCanonicalMemberIndex(a.id) - getCanonicalMemberIndex(b.id);
     });
   }
 
@@ -1221,17 +1232,15 @@
   function renderStandardBranchDescendants(container, branchId) {
     const renderedInBranch = new Set();
 
-    // Group Gen 3 members into couples or singles, sorted oldest to youngest
+    // Integrantes de la Generación 3 de esta rama en su orden canónico original
     const gen3All = familyData.members.filter(m => m.branch === branchId && m.generation === 3);
-    const bloodlineGen3 = sortMembersByAge(gen3All.filter(m => !m.role?.includes('Cónyuge')));
-    const otherGen3 = gen3All.filter(m => !bloodlineGen3.includes(m) && !m.spouseId);
-    const gen3Members = [...bloodlineGen3, ...otherGen3];
+    const sortedGen3 = sortMembersByAge(gen3All);
 
     const renderedGen3 = new Set();
     const gen3Row = document.createElement('div');
     gen3Row.className = 'subgroup-couples';
 
-    gen3Members.forEach(m => {
+    sortedGen3.forEach(m => {
       if (renderedGen3.has(m.id)) return;
 
       const groupContainer = document.createElement('div');
@@ -1253,15 +1262,20 @@
       }
       groupContainer.appendChild(coupleDiv);
 
-      // Children of this couple (Gen 4) sorted from oldest to youngest
+      // Hijos de esta pareja (Gen 4) en su orden canónico original
       const children = familyData.members.filter(c => c.parentId === m.id || (m.spouseId && c.parentId === m.spouseId));
       if (children.length > 0) {
         const sortedChildren = sortMembersByAge(children);
         const kidsRow = document.createElement('div');
         kidsRow.className = 'children-row';
+
+        const renderedInKids = new Set();
         sortedChildren.forEach(child => {
+          if (renderedInKids.has(child.id)) return;
+          renderedInKids.add(child.id);
           renderedInBranch.add(child.id);
-          // If child has children (Gen 5)
+
+          // Si el hijo tiene descendencia (Gen 5)
           const grandKids = familyData.members.filter(gc => gc.parentId === child.id || (child.spouseId && gc.parentId === child.spouseId));
           if (grandKids.length > 0) {
             const subWrap = document.createElement('div');
@@ -1278,6 +1292,7 @@
               if (chSpouse) {
                 childCouple.appendChild(createMemberCard(chSpouse, true));
                 renderedInBranch.add(chSpouse.id);
+                renderedInKids.add(chSpouse.id);
               }
             }
             subWrap.appendChild(childCouple);
@@ -1300,6 +1315,7 @@
               if (chSpouse) {
                 childCouple.appendChild(createMemberCard(chSpouse, true));
                 renderedInBranch.add(chSpouse.id);
+                renderedInKids.add(chSpouse.id);
               }
               kidsRow.appendChild(childCouple);
             } else {
@@ -1313,21 +1329,20 @@
       gen3Row.appendChild(groupContainer);
     });
 
-    // RESILIENCIA: Comprobar si hay integrantes de esta rama (Gen 3+) que no fueron alcanzados por la jerarquía
-    const unrenderedBranchMembers = familyData.members.filter(m =>
+    // Seguridad: verificar si queda algún integrante Gen 3 sin renderizar en la rama
+    const unrenderedGen3Members = familyData.members.filter(m =>
       m.branch === branchId &&
-      m.generation >= 3 &&
+      m.generation === 3 &&
       !renderedInBranch.has(m.id)
     );
-
-    if (unrenderedBranchMembers.length > 0) {
+    if (unrenderedGen3Members.length > 0) {
       const unrenderedGroup = document.createElement('div');
       unrenderedGroup.className = 'branch-couples-wrap';
       unrenderedGroup.style.padding = '0.5rem';
 
       const unrenderedRow = document.createElement('div');
       unrenderedRow.className = 'couple-group';
-      sortMembersByAge(unrenderedBranchMembers).forEach(um => {
+      sortMembersByAge(unrenderedGen3Members).forEach(um => {
         unrenderedRow.appendChild(createMemberCard(um, true));
       });
       unrenderedGroup.appendChild(unrenderedRow);
@@ -1607,7 +1622,7 @@
       const rawMembersInBranch = familyData.members.filter(m => m.branch === branch.id);
       const membersInBranch = [...rawMembersInBranch].sort((a, b) => {
         if (a.generation !== b.generation) return a.generation - b.generation;
-        return sortMembersByAge([a, b])[0] === a ? -1 : 1;
+        return getCanonicalMemberIndex(a.id) - getCanonicalMemberIndex(b.id);
       });
       const withPhotoCount = membersInBranch.filter(m => m.photo).length;
 
@@ -1655,7 +1670,7 @@
 
     list.sort((a, b) => {
       if (a.generation !== b.generation) return a.generation - b.generation;
-      return sortMembersByAge([a, b])[0] === a ? -1 : 1;
+      return getCanonicalMemberIndex(a.id) - getCanonicalMemberIndex(b.id);
     });
 
     // Update Directory stats
