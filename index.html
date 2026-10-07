@@ -82,6 +82,12 @@
         </button>
       </div>
 
+      <!-- Cloud Sync Status Button -->
+      <button id="cloudStatusBtn" class="action-btn cloud-btn" title="Sincronización familiar en la nube">
+        <span class="cloud-status-dot"></span>
+        <span id="cloudStatusText">Nube</span>
+      </button>
+
       <!-- Add Member Direct Button -->
       <button id="topAddMemberBtn" class="action-btn success-btn" title="Agregar un nuevo familiar al árbol">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -372,10 +378,75 @@
     </div>
   </div>
 
+  <!-- Cloud Sync Modal (Firebase Firestore) -->
+  <div id="cloudModal" class="modal-backdrop">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title">☁️ Sincronización en la Nube</h2>
+          <span id="cloudBadgeState" class="branch-tag" style="background:#64748b;">Desconectada</span>
+        </div>
+        <button id="cloudModalCloseBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.86rem; color:var(--text-main); margin-bottom:1rem; line-height:1.5;">
+          Conecta una base de datos gratuita de <strong>Google Firebase Firestore</strong> para que todos los familiares desde sus teléfonos o computadoras puedan <strong>agregar participantes, modificar datos y subir sus fotos en tiempo real</strong> sin tocar el código.
+        </p>
+
+        <div id="cloudConnectedSection" style="display:none; background:rgba(16,185,129,0.08); border:1px solid #10b981; border-radius:10px; padding:1rem; margin-bottom:1rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; color:#047857; font-weight:600; margin-bottom:0.4rem;">
+            <span>✅ Base de datos conectada en tiempo real</span>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-main); margin:0;">
+            Cualquier cambio o foto que subas tú o tus familiares se sincroniza automáticamente al instante.
+          </p>
+          <div style="margin-top:0.8rem; display:flex; gap:0.5rem;">
+            <button id="syncNowBtn" class="btn small primary">🔄 Sincronizar Ahora</button>
+            <button id="disconnectCloudBtn" class="btn small text-danger">Desconectar Nube</button>
+          </div>
+        </div>
+
+        <div id="cloudConfigSection">
+          <div class="form-group" style="margin-bottom:0.8rem;">
+            <label style="font-weight:600; font-size:0.82rem;">Configuración de Firebase (pega tu firebaseConfig aquí):</label>
+            <textarea id="firebaseConfigInput" rows="6" style="font-family:monospace; font-size:0.78rem; width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem; box-sizing:border-box;" placeholder='const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "tu-arbol.firebaseapp.com",
+  projectId: "tu-arbol",
+  storageBucket: "tu-arbol.appspot.com",
+  messagingSenderId: "...",
+  appId: "..."
+};'></textarea>
+          </div>
+          <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+            <button id="saveCloudConfigBtn" class="btn primary small">💾 Guardar y Conectar Nube</button>
+            <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="font-size:0.8rem; color:var(--accent-burgundy); text-decoration:underline;">Crear proyecto gratis en Firebase ↗</a>
+          </div>
+          <div style="margin-top:1rem; font-size:0.78rem; color:var(--text-muted); line-height:1.45; background:rgba(0,0,0,0.02); padding:0.8rem; border-radius:8px;">
+            <strong>¿Cómo activarlo gratis en 2 minutos?</strong>
+            <ol style="margin-top:0.4rem; padding-left:1.2rem; margin-bottom:0;">
+              <li>Crea un proyecto en <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a>.</li>
+              <li>En <em>Firestore Database</em>, pulsa <strong>Crear base de datos</strong> (modo prueba).</li>
+              <li>En <em>Configuración del proyecto (⚙️) ➔ Web (&lt;/&gt;)</em>, copia el código <code>firebaseConfig</code> y pégalo arriba.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="closeCloudModalBtn" class="btn secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification"></div>
 
-  <!-- Script tags -->
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <!-- Application scripts -->
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

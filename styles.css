@@ -417,6 +417,48 @@ body.theme-dark .view-switcher {
   transform: translateY(-1px);
 }
 
+.action-btn.cloud-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.action-btn.cloud-btn.connected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  color: #047857;
+}
+
+body.theme-dark .action-btn.cloud-btn.connected {
+  color: #34d399;
+}
+
+.cloud-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+  display: inline-block;
+  transition: background 0.3s ease;
+}
+
+.action-btn.cloud-btn.connected .cloud-status-dot {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* Actions Dropdown */
 .actions-dropdown {
   position: absolute;

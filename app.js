@@ -87,6 +87,243 @@
   // Temporary storage for photo while editing in modal
   let currentModalPhoto = null;
 
+  // --- CLOUD SYNC STATE & LOGIC (Firebase Firestore) ---
+  let isCloudActive = false;
+  let firestoreDb = null;
+  let firestoreUnsubscribe = null;
+  const CLOUD_CONFIG_STORAGE_KEY = 'family_tree_firebase_config';
+
+  const cloudStatusBtn = document.getElementById('cloudStatusBtn');
+  const cloudStatusText = document.getElementById('cloudStatusText');
+  const cloudModal = document.getElementById('cloudModal');
+  const cloudModalCloseBtn = document.getElementById('cloudModalCloseBtn');
+  const closeCloudModalBtn = document.getElementById('closeCloudModalBtn');
+  const cloudBadgeState = document.getElementById('cloudBadgeState');
+  const cloudConnectedSection = document.getElementById('cloudConnectedSection');
+  const cloudConfigSection = document.getElementById('cloudConfigSection');
+  const firebaseConfigInput = document.getElementById('firebaseConfigInput');
+  const saveCloudConfigBtn = document.getElementById('saveCloudConfigBtn');
+  const syncNowBtn = document.getElementById('syncNowBtn');
+  const disconnectCloudBtn = document.getElementById('disconnectCloudBtn');
+
+  function getEffectiveFirebaseConfig() {
+    if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && window.FIREBASE_CONFIG.projectId) {
+      return window.FIREBASE_CONFIG;
+    }
+    try {
+      const stored = localStorage.getItem(CLOUD_CONFIG_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function initCloudSync() {
+    const config = getEffectiveFirebaseConfig();
+    if (!config || !config.apiKey || !config.projectId) {
+      updateCloudUiState(false);
+      return;
+    }
+
+    try {
+      if (typeof firebase === 'undefined') {
+        console.warn('Firebase SDK no cargado en la página.');
+        updateCloudUiState(false, 'Sin SDK');
+        return;
+      }
+
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(config);
+      }
+      firestoreDb = firebase.firestore();
+      updateCloudUiState(true);
+      listenToCloudMembers();
+    } catch (err) {
+      console.warn('Error inicializando Firebase:', err);
+      updateCloudUiState(false, 'Error');
+    }
+  }
+
+  function updateCloudUiState(connected, label = '') {
+    isCloudActive = connected;
+    if (cloudStatusBtn) {
+      if (connected) {
+        cloudStatusBtn.classList.add('connected');
+        if (cloudStatusText) cloudStatusText.textContent = 'Nube Conectada';
+        if (cloudBadgeState) {
+          cloudBadgeState.textContent = 'En Vivo';
+          cloudBadgeState.style.backgroundColor = '#10b981';
+        }
+        if (cloudConnectedSection) cloudConnectedSection.style.display = 'block';
+        if (cloudConfigSection) cloudConfigSection.style.display = 'none';
+      } else {
+        cloudStatusBtn.classList.remove('connected');
+        if (cloudStatusText) cloudStatusText.textContent = label || 'Conectar Nube';
+        if (cloudBadgeState) {
+          cloudBadgeState.textContent = label || 'Desconectada';
+          cloudBadgeState.style.backgroundColor = '#64748b';
+        }
+        if (cloudConnectedSection) cloudConnectedSection.style.display = 'none';
+        if (cloudConfigSection) cloudConfigSection.style.display = 'block';
+      }
+    }
+  }
+
+  function listenToCloudMembers() {
+    if (!firestoreDb) return;
+
+    const colRef = firestoreDb.collection('families').doc('reyna_aliaga').collection('members');
+
+    colRef.limit(1).get().then(snapshot => {
+      if (snapshot.empty) {
+        console.log('Colección vacía. Subiendo datos iniciales a Firestore...');
+        seedFirestore(colRef);
+      }
+    }).catch(err => {
+      console.warn('Verificación de colección en Firestore:', err);
+    });
+
+    if (firestoreUnsubscribe) firestoreUnsubscribe();
+
+    let initialLoadDone = false;
+    firestoreUnsubscribe = colRef.onSnapshot(snapshot => {
+      if (snapshot.empty && !initialLoadDone) {
+        initialLoadDone = true;
+        return;
+      }
+
+      const cloudMembers = [];
+      snapshot.forEach(doc => {
+        cloudMembers.push(doc.data());
+      });
+
+      if (cloudMembers.length > 0) {
+        familyData.members = cloudMembers;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(familyData));
+        renderAll();
+        if (initialLoadDone) {
+          showToast('☁️ Árbol actualizado por un familiar en tiempo real.');
+        } else {
+          showToast(`☁️ Nube conectada: ${cloudMembers.length} integrantes cargados.`);
+        }
+      }
+      initialLoadDone = true;
+    }, err => {
+      console.warn('Error en listener de Firestore:', err);
+    });
+  }
+
+  async function seedFirestore(colRef) {
+    try {
+      showToast('☁️ Subiendo integrantes a la nube...');
+      const batchSize = 100;
+      let batch = firestoreDb.batch();
+      let count = 0;
+
+      for (const m of familyData.members) {
+        const docRef = colRef.doc(m.id);
+        batch.set(docRef, m);
+        count++;
+        if (count % batchSize === 0) {
+          await batch.commit();
+          batch = firestoreDb.batch();
+        }
+      }
+      if (count % batchSize !== 0) {
+        await batch.commit();
+      }
+      showToast(`☁️ ¡${count} integrantes subidos a la nube exitosamente!`);
+    } catch (err) {
+      console.error('Error migrando datos a Firestore:', err);
+      showToast('⚠️ No se pudo inicializar la colección en Firestore.');
+    }
+  }
+
+  function saveMemberToCloud(member) {
+    if (!isCloudActive || !firestoreDb) return;
+    firestoreDb.collection('families').doc('reyna_aliaga').collection('members')
+      .doc(member.id).set(member, { merge: true })
+      .catch(err => console.error('Error guardando en Firestore:', err));
+  }
+
+  function deleteMemberFromCloud(memberId) {
+    if (!isCloudActive || !firestoreDb) return;
+    firestoreDb.collection('families').doc('reyna_aliaga').collection('members')
+      .doc(memberId).delete()
+      .catch(err => console.error('Error eliminando de Firestore:', err));
+  }
+
+  function bindCloudEvents() {
+    if (cloudStatusBtn) {
+      cloudStatusBtn.addEventListener('click', () => {
+        if (cloudModal) cloudModal.classList.add('active');
+      });
+    }
+    if (cloudModalCloseBtn) {
+      cloudModalCloseBtn.addEventListener('click', () => {
+        if (cloudModal) cloudModal.classList.remove('active');
+      });
+    }
+    if (closeCloudModalBtn) {
+      closeCloudModalBtn.addEventListener('click', () => {
+        if (cloudModal) cloudModal.classList.remove('active');
+      });
+    }
+
+    if (saveCloudConfigBtn) {
+      saveCloudConfigBtn.addEventListener('click', () => {
+        let text = (firebaseConfigInput.value || '').trim();
+        if (!text) {
+          alert('Por favor pega la configuración de Firebase.');
+          return;
+        }
+
+        let parsedConfig = null;
+        try {
+          if (text.includes('{') && text.includes('}')) {
+            const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+            parsedConfig = (new Function(`return ${jsonText}`))();
+          } else {
+            parsedConfig = JSON.parse(text);
+          }
+        } catch (e) {
+          alert('No se pudo interpretar el formato de configuración. Asegúrate de incluir las llaves { } con apiKey y projectId.');
+          return;
+        }
+
+        if (!parsedConfig || !parsedConfig.apiKey || !parsedConfig.projectId) {
+          alert('La configuración debe contener al menos "apiKey" y "projectId".');
+          return;
+        }
+
+        localStorage.setItem(CLOUD_CONFIG_STORAGE_KEY, JSON.stringify(parsedConfig));
+        showToast('💾 Configuración guardada. Conectando a Firebase...');
+        initCloudSync();
+        if (cloudModal) cloudModal.classList.remove('active');
+      });
+    }
+
+    if (disconnectCloudBtn) {
+      disconnectCloudBtn.addEventListener('click', () => {
+        if (confirm('¿Desconectar la base de datos en la nube y volver al modo local?')) {
+          localStorage.removeItem(CLOUD_CONFIG_STORAGE_KEY);
+          if (firestoreUnsubscribe) firestoreUnsubscribe();
+          firestoreDb = null;
+          updateCloudUiState(false);
+          showToast('Nube desconectada. Operando en modo local.');
+        }
+      });
+    }
+
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener('click', () => {
+        listenToCloudMembers();
+        showToast('🔄 Recargando datos desde la nube...');
+      });
+    }
+  }
+
   // --- INITIALIZATION ---
   function init() {
     loadData();
@@ -95,6 +332,8 @@
     renderAll();
     centerTreeOnPatriarchs();
     updatePhotoProgress();
+    initCloudSync();
+    bindCloudEvents();
   }
 
   // --- DATA LOADING & PERSISTENCE ---
@@ -105,6 +344,12 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         familyData = JSON.parse(stored);
+        // Asegurar que integrantes base nuevos (Gaspar, Tomás, Ramiro) se sincronicen
+        FAMILY_TREE_DATA.members.forEach(baseM => {
+          if (!familyData.members.some(m => m.id === baseM.id)) {
+            familyData.members.push(JSON.parse(JSON.stringify(baseM)));
+          }
+        });
       } else {
         familyData = JSON.parse(JSON.stringify(FAMILY_TREE_DATA));
         // Migrar fotos previas si existen en v2 o v1
@@ -793,6 +1038,7 @@
           if (member) {
             member.photo = compressed;
             saveData();
+            saveMemberToCloud(member);
             renderAll();
             showToast(`✅ Foto de ${member.name} actualizada.`);
           }
@@ -1270,6 +1516,7 @@
     }
 
     saveData();
+    saveMemberToCloud(member);
     closeModal();
     renderAll();
     showToast(isNew ? `🎉 ${member.name} añadido al árbol familiar.` : `💾 Datos de ${member.name} guardados correctamente.`);
@@ -1283,6 +1530,7 @@
     if (confirm(`¿Estás seguro de que deseas eliminar a ${member.name} del árbol genealógico?`)) {
       familyData.members = familyData.members.filter(m => m.id !== activeMemberId);
       saveData();
+      deleteMemberFromCloud(activeMemberId);
       closeModal();
       renderAll();
       showToast(`🗑️ ${member.name} eliminado del árbol.`);
