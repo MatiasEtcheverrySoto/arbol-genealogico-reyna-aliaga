@@ -38,8 +38,8 @@
         <div id="searchResultsDropdown" class="search-dropdown"></div>
       </div>
 
-      <!-- Quick Branch Filter -->
-      <select id="branchFilterSelect" class="filter-select" title="Filtrar por rama">
+      <!-- Quick Branch Filter (Oculto) -->
+      <select id="branchFilterSelect" class="filter-select" title="Filtrar por rama" style="display: none;">
         <option value="all">Todas las ramas (11)</option>
         <option value="graciela">Rama Graciela</option>
         <option value="carlos">Rama Carlos</option>
@@ -57,8 +57,8 @@
 
     <!-- Right Controls -->
     <div class="header-right">
-      <!-- Photo Completion Status Badge -->
-      <div class="photo-progress-badge" id="photoProgressBadge" title="Progreso de fotos añadidas">
+      <!-- Photo Completion Status Badge (Oculto) -->
+      <div class="photo-progress-badge" id="photoProgressBadge" title="Progreso de fotos añadidas" style="display: none;">
         <span class="camera-icon">📸</span>
         <span id="photoProgressText">0 / 0 Fotos</span>
         <div class="mini-progress-bar">
@@ -66,8 +66,8 @@
         </div>
       </div>
 
-      <!-- View Switcher -->
-      <div class="view-switcher">
+      <!-- View Switcher (Oculto) -->
+      <div class="view-switcher" style="display: none;">
         <button class="view-btn active" data-view="tree" title="Vista Árbol Panorámico">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Árbol
@@ -82,8 +82,8 @@
         </button>
       </div>
 
-      <!-- Cloud Sync Status Button -->
-      <button id="cloudStatusBtn" class="action-btn cloud-btn" title="Sincronización familiar en la nube">
+      <!-- Cloud Sync Status Button (Oculto) -->
+      <button id="cloudStatusBtn" class="action-btn cloud-btn" title="Sincronización familiar en la nube" style="display: none;">
         <span class="cloud-status-dot"></span>
         <span id="cloudStatusText">Nube</span>
       </button>
@@ -94,14 +94,14 @@
         <span>+ Agregar Familiar</span>
       </button>
 
-      <!-- More Actions Menu Button -->
-      <button id="actionsMenuBtn" class="action-btn primary" title="Herramientas y exportación">
+      <!-- More Actions Menu Button (Oculto) -->
+      <button id="actionsMenuBtn" class="action-btn primary" title="Herramientas y exportación" style="display: none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
         Opciones
       </button>
 
-      <!-- Dropdown Menu -->
-      <div id="actionsDropdown" class="actions-dropdown">
+      <!-- Dropdown Menu (Oculto) -->
+      <div id="actionsDropdown" class="actions-dropdown" style="display: none;">
         <button id="addMemberBtn"><span class="menu-icon">➕</span> Agregar Integrante</button>
         <div class="dropdown-divider"></div>
         <button id="exportJsonBtn"><span class="menu-icon">💾</span> Exportar Respaldo (JSON con fotos)</button>

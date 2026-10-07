@@ -301,6 +301,16 @@ body.theme-dark .family-title {
   border-color: var(--accent-burgundy);
 }
 
+/* Ocultar elementos de la barra superior según solicitud */
+#branchFilterSelect,
+#photoProgressBadge,
+.view-switcher,
+#cloudStatusBtn,
+#actionsMenuBtn,
+#actionsDropdown {
+  display: none !important;
+}
+
 /* Header Right */
 .header-right {
   display: flex;
