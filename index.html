@@ -222,44 +222,44 @@
       </div>
 
       <div class="modal-body">
-        <!-- Photo Management Panel -->
+        <!-- Photo Management Panel (Rediseño Estético y Moderno) -->
         <div class="photo-edit-section">
           <div class="photo-preview-wrap">
-            <div id="modalPhotoPreview" class="modal-photo-preview empty">
+            <div id="modalPhotoPreview" class="modal-photo-preview empty" title="Haz clic para seleccionar o cambiar foto">
               <!-- Imagen o Iniciales -->
             </div>
-            <div class="photo-drop-hint">Arrastra y suelta una imagen aquí</div>
+            <label for="memberPhotoFileInput" class="photo-avatar-badge" title="Cambiar fotografía">
+              📷
+            </label>
           </div>
 
           <div class="photo-controls">
-            <div class="file-btn-wrap">
-              <label for="memberPhotoFileInput" class="btn secondary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                Subir foto desde archivo
+            <div class="photo-controls-row">
+              <label for="memberPhotoFileInput" class="btn btn-photo-upload">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Subir foto desde archivo</span>
               </label>
               <input type="file" id="memberPhotoFileInput" accept="image/*" style="display:none;">
+
+              <button type="button" id="removePhotoBtn" class="btn-photo-remove" title="Quitar foto actual">
+                🗑️ Quitar foto
+              </button>
+            </div>
+
+            <div class="photo-divider-row">
+              <span class="photo-divider-line"></span>
+              <span class="photo-divider-text">o pegar enlace web</span>
+              <span class="photo-divider-line"></span>
             </div>
 
             <div class="url-input-row">
-              <input type="text" id="memberPhotoUrlInput" placeholder="O pegar enlace directo de imagen (URL)...">
-              <button id="loadUrlPhotoBtn" class="btn small">Cargar</button>
+              <span class="url-input-icon">🔗</span>
+              <input type="text" id="memberPhotoUrlInput" placeholder="https://ejemplo.com/foto.jpg">
+              <button type="button" id="loadUrlPhotoBtn" class="btn btn-url-apply">Cargar</button>
             </div>
 
-            <button id="removePhotoBtn" class="btn text-danger small">
-              🗑️ Quitar foto actual
-            </button>
+            <div class="photo-drop-hint">💡 Arrastra una imagen aquí o haz clic en el círculo</div>
           </div>
-        </div>
-
-        <!-- Quick Relation Actions (Visible when editing an existing member) -->
-        <div id="modalQuickActions" class="modal-quick-actions">
-          <span class="quick-actions-label">Vínculos rápidos:</span>
-          <button type="button" id="modalAddChildBtn" class="btn secondary small">
-            👶 + Agregar Hijo/a
-          </button>
-          <button type="button" id="modalAddSpouseBtn" class="btn secondary small">
-            💍 + Agregar Pareja / Cónyuge
-          </button>
         </div>
 
         <!-- Form fields -->
@@ -316,18 +316,30 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="formSpouse">Cónyuge / Pareja</label>
-              <select id="formSpouse">
-                <option value="">(Ninguno / Soltero)</option>
-              </select>
+              <label for="formSpouseSearch">Cónyuge / Pareja</label>
+              <div class="searchable-combobox" id="spouseCombobox">
+                <div class="combobox-input-wrap">
+                  <span class="combobox-search-icon">🔍</span>
+                  <input type="text" id="formSpouseSearch" class="combobox-input" placeholder="Escribe para buscar cónyuge..." autocomplete="off">
+                  <button type="button" class="combobox-clear-btn" id="spouseClearBtn" title="Quitar cónyuge">&times;</button>
+                </div>
+                <input type="hidden" id="formSpouse" value="">
+                <div class="combobox-menu" id="spouseDropdownMenu"></div>
+              </div>
             </div>
           </div>
 
           <div class="form-group">
-            <label for="formParent">Progenitor / Padre o Madre</label>
-            <select id="formParent">
-              <option value="">(Ninguno / Raíz)</option>
-            </select>
+            <label for="formParentSearch">Progenitor / Padre o Madre</label>
+            <div class="searchable-combobox" id="parentCombobox">
+              <div class="combobox-input-wrap">
+                <span class="combobox-search-icon">🔍</span>
+                <input type="text" id="formParentSearch" class="combobox-input" placeholder="Escribe para buscar padre o madre..." autocomplete="off">
+                <button type="button" class="combobox-clear-btn" id="parentClearBtn" title="Quitar progenitor">&times;</button>
+              </div>
+              <input type="hidden" id="formParent" value="">
+              <div class="combobox-menu" id="parentDropdownMenu"></div>
+            </div>
           </div>
 
           <div class="form-row">

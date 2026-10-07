@@ -635,6 +635,11 @@
     }
 
     memberPhotoFileInput.addEventListener('change', handlePhotoFileSelect);
+    if (modalPhotoPreview) {
+      modalPhotoPreview.addEventListener('click', () => {
+        memberPhotoFileInput.click();
+      });
+    }
     loadUrlPhotoBtn.addEventListener('click', handlePhotoUrlLoad);
     removePhotoBtn.addEventListener('click', () => {
       currentModalPhoto = null;
@@ -1616,13 +1621,152 @@
     memberModal.classList.add('active');
   }
 
+  function setupSearchableCombobox({
+    inputId,
+    hiddenId,
+    menuId,
+    clearBtnId,
+    placeholderNone,
+    options,
+    selectedId,
+    onSelect
+  }) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const menu = document.getElementById(menuId);
+    const clearBtn = document.getElementById(clearBtnId);
+    if (!input || !hidden || !menu || !clearBtn) return;
+
+    // Set initial selection
+    hidden.value = selectedId || '';
+    if (selectedId) {
+      const selectedItem = options.find(o => o.id === selectedId);
+      input.value = selectedItem ? selectedItem.displayName : '';
+      clearBtn.style.display = 'block';
+    } else {
+      input.value = '';
+      clearBtn.style.display = 'none';
+    }
+
+    function renderMenu(filterText = '') {
+      menu.innerHTML = '';
+      const filterLower = filterText.toLowerCase().trim();
+
+      // None item
+      const noneItem = document.createElement('div');
+      noneItem.className = `combobox-item none-item ${!hidden.value ? 'selected' : ''}`;
+      noneItem.textContent = placeholderNone;
+      noneItem.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectOption(null);
+      });
+      menu.appendChild(noneItem);
+
+      const filtered = options.filter(opt => {
+        if (!filterLower) return true;
+        const text = `${opt.name} ${opt.fullName || ''} ${opt.branchName || ''}`.toLowerCase();
+        return text.includes(filterLower);
+      });
+
+      if (filtered.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'combobox-no-results';
+        noResults.textContent = `No se encontró ningún integrante con "${filterText}"`;
+        menu.appendChild(noResults);
+        return;
+      }
+
+      filtered.forEach(opt => {
+        const item = document.createElement('div');
+        item.className = `combobox-item ${hidden.value === opt.id ? 'selected' : ''}`;
+
+        const avatar = document.createElement('span');
+        avatar.className = 'combobox-item-avatar';
+        avatar.style.backgroundColor = opt.branchColor || '#722F37';
+        avatar.textContent = getInitials(opt.name);
+        item.appendChild(avatar);
+
+        const info = document.createElement('div');
+        info.className = 'combobox-item-info';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'combobox-item-name';
+        nameEl.textContent = opt.fullName || opt.name;
+        info.appendChild(nameEl);
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'combobox-item-meta';
+        metaEl.style.color = opt.branchColor || 'var(--text-muted)';
+        metaEl.textContent = `${opt.branchName} • Gen ${opt.generation}${opt.role ? ' • ' + opt.role : ''}`;
+        info.appendChild(metaEl);
+
+        item.appendChild(info);
+
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          selectOption(opt);
+        });
+
+        menu.appendChild(item);
+      });
+    }
+
+    function selectOption(opt) {
+      if (opt) {
+        hidden.value = opt.id;
+        input.value = opt.displayName;
+        clearBtn.style.display = 'block';
+      } else {
+        hidden.value = '';
+        input.value = '';
+        clearBtn.style.display = 'none';
+      }
+      menu.classList.remove('active');
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
+      if (onSelect) onSelect(opt);
+    }
+
+    // Input events
+    input.onfocus = () => {
+      renderMenu('');
+      menu.classList.add('active');
+    };
+
+    input.onclick = () => {
+      renderMenu(input.value);
+      menu.classList.add('active');
+    };
+
+    input.oninput = () => {
+      renderMenu(input.value);
+      menu.classList.add('active');
+      if (!input.value.trim()) {
+        hidden.value = '';
+        clearBtn.style.display = 'none';
+        hidden.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+
+    input.onblur = () => {
+      setTimeout(() => {
+        menu.classList.remove('active');
+        if (hidden.value) {
+          const opt = options.find(o => o.id === hidden.value);
+          if (opt) input.value = opt.displayName;
+        } else {
+          input.value = '';
+        }
+      }, 200);
+    };
+
+    clearBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectOption(null);
+    };
+  }
+
   function populateSpouseAndParentSelects(currentMember = {}) {
-    const formSpouse = document.getElementById('formSpouse');
-    const formParent = document.getElementById('formParent');
-
-    formSpouse.innerHTML = '<option value="">(Ninguno / Soltero)</option>';
-    formParent.innerHTML = '<option value="">(Ninguno / Raíz)</option>';
-
     // Sort alphabetically by full name for convenient selection
     const sorted = [...familyData.members].sort((a, b) => {
       const nameA = (a.fullName || a.name || '').toLowerCase();
@@ -1630,34 +1774,95 @@
       return nameA.localeCompare(nameB);
     });
 
+    const spouseOptions = [];
+    const parentOptions = [];
+
     sorted.forEach(m => {
       if (currentMember.id && m.id === currentMember.id) return;
+      const br = getBranch(m.branch);
 
-      const optSpouse = document.createElement('option');
-      optSpouse.value = m.id;
-      optSpouse.textContent = `${m.fullName || m.name} (${getBranch(m.branch).name})`;
-      if (m.id === currentMember.spouseId) optSpouse.selected = true;
-      formSpouse.appendChild(optSpouse);
+      spouseOptions.push({
+        id: m.id,
+        name: m.name,
+        fullName: m.fullName,
+        branch: m.branch,
+        branchName: br.name,
+        branchColor: br.color,
+        generation: m.generation,
+        role: m.role,
+        displayName: `${m.fullName || m.name} (${br.name})`
+      });
 
-      const optParent = document.createElement('option');
-      optParent.value = m.id;
-      optParent.textContent = `${m.fullName || m.name} (${getBranch(m.branch).name} - Gen ${m.generation})`;
-      if (m.id === currentMember.parentId) optParent.selected = true;
-      formParent.appendChild(optParent);
+      parentOptions.push({
+        id: m.id,
+        name: m.name,
+        fullName: m.fullName,
+        branch: m.branch,
+        branchName: br.name,
+        branchColor: br.color,
+        generation: m.generation,
+        role: m.role,
+        displayName: `${m.fullName || m.name} (${br.name} - Gen ${m.generation})`
+      });
+    });
+
+    setupSearchableCombobox({
+      inputId: 'formSpouseSearch',
+      hiddenId: 'formSpouse',
+      menuId: 'spouseDropdownMenu',
+      clearBtnId: 'spouseClearBtn',
+      placeholderNone: '(Ninguno / Soltero)',
+      options: spouseOptions,
+      selectedId: currentMember.spouseId || null
+    });
+
+    setupSearchableCombobox({
+      inputId: 'formParentSearch',
+      hiddenId: 'formParent',
+      menuId: 'parentDropdownMenu',
+      clearBtnId: 'parentClearBtn',
+      placeholderNone: '(Ninguno / Raíz)',
+      options: parentOptions,
+      selectedId: currentMember.parentId || null,
+      onSelect: (opt) => {
+        if (opt) {
+          const parent = familyData.members.find(m => m.id === opt.id);
+          if (parent) {
+            document.getElementById('formBranch').value = parent.branch;
+            const nextGen = Math.min(5, (parent.generation || 2) + 1);
+            document.getElementById('formGeneration').value = nextGen;
+            const br = getBranch(parent.branch);
+            modalBranchTag.textContent = br.name;
+            modalBranchTag.style.backgroundColor = br.color;
+            const roleEl = document.getElementById('formRole');
+            if (roleEl && (!roleEl.value || roleEl.value === 'Nuevo integrante' || roleEl.value === 'Integrante')) {
+              roleEl.value = nextGen === 3 ? 'Nieto' : (nextGen === 4 ? 'Bisnieto' : 'Tataranieto');
+            }
+            const siblings = familyData.members.filter(c => c.parentId === parent.id && !c.role?.includes('Cónyuge'));
+            const formOrderEl = document.getElementById('formOrder');
+            if (formOrderEl && !activeMemberId) {
+              formOrderEl.value = siblings.length + 1;
+            }
+          }
+        }
+      }
     });
   }
 
   function renderModalPhotoPreview(photoUrl, name) {
     modalPhotoPreview.innerHTML = '';
+    const removeBtn = document.getElementById('removePhotoBtn');
     if (photoUrl) {
       const img = document.createElement('img');
       img.src = photoUrl;
-      img.alt = name;
+      img.alt = name || 'Foto';
       modalPhotoPreview.appendChild(img);
       modalPhotoPreview.classList.remove('empty');
+      if (removeBtn) removeBtn.style.display = 'inline-flex';
     } else {
       modalPhotoPreview.textContent = getInitials(name || 'Nuevo');
       modalPhotoPreview.classList.add('empty');
+      if (removeBtn) removeBtn.style.display = 'none';
     }
   }
 
