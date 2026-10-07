@@ -1456,6 +1456,61 @@ body.theme-dark .photo-edit-section {
   border-color: var(--accent-burgundy);
 }
 
+.field-help-text {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.sibling-order-box {
+  background: var(--bg-hover);
+  border: 1.5px dashed var(--border-color);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sibling-order-header {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sibling-order-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sibling-order-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+}
+
+.sibling-chip {
+  padding: 0.25rem 0.6rem;
+  border-radius: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.sibling-chip.active {
+  background: var(--accent-burgundy);
+  color: #fff;
+  font-weight: 700;
+  border-color: var(--accent-burgundy);
+  box-shadow: 0 2px 6px rgba(114, 47, 55, 0.25);
+}
+
 .modal-footer {
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--border-subtle);

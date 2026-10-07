@@ -528,6 +528,39 @@
     saveMemberBtn.addEventListener('click', saveModalMember);
     deleteMemberBtn.addEventListener('click', confirmDeleteMember);
 
+    const btnMoveOlder = document.getElementById('btnMoveOlder');
+    if (btnMoveOlder) btnMoveOlder.addEventListener('click', () => moveMemberRelative(-1));
+    const btnMoveYounger = document.getElementById('btnMoveYounger');
+    if (btnMoveYounger) btnMoveYounger.addEventListener('click', () => moveMemberRelative(1));
+
+    const formBirthYearInput = document.getElementById('formBirthYear');
+    if (formBirthYearInput) {
+      formBirthYearInput.addEventListener('input', () => {
+        if (activeMemberId) {
+          const m = getMember(activeMemberId);
+          if (m) {
+            const rawVal = formBirthYearInput.value.trim();
+            m.birthYear = rawVal ? parseInt(rawVal, 10) : null;
+            renderModalSiblingOrder(m);
+          }
+        }
+      });
+    }
+
+    const formOrderInput = document.getElementById('formOrder');
+    if (formOrderInput) {
+      formOrderInput.addEventListener('input', () => {
+        if (activeMemberId) {
+          const m = getMember(activeMemberId);
+          if (m) {
+            const rawVal = formOrderInput.value.trim();
+            m.order = rawVal ? parseFloat(rawVal) : null;
+            renderModalSiblingOrder(m);
+          }
+        }
+      });
+    }
+
     const memberForm = document.getElementById('memberForm');
     if (memberForm) {
       memberForm.addEventListener('submit', (e) => {
@@ -552,6 +585,12 @@
             const roleEl = document.getElementById('formRole');
             if (roleEl && (!roleEl.value || roleEl.value === 'Nuevo integrante' || roleEl.value === 'Integrante')) {
               roleEl.value = nextGen === 3 ? 'Nieto' : (nextGen === 4 ? 'Bisnieto' : 'Tataranieto');
+            }
+            // Auto order for newly added member
+            const siblings = familyData.members.filter(c => c.parentId === pId && !c.role?.includes('Cónyuge'));
+            const formOrderEl = document.getElementById('formOrder');
+            if (formOrderEl && !activeMemberId) {
+              formOrderEl.value = siblings.length + 1;
             }
           }
         }
@@ -827,9 +866,137 @@
     return col;
   }
 
+  // --- AGE & ORDER UTILITIES (DEL MÁS GRANDE AL MÁS CHICO) ---
+  function sortMembersByAge(members) {
+    if (!members || !members.length) return [];
+    return [...members].sort((a, b) => {
+      // 1. Birth Year (lower year = born earlier = older / más grande)
+      const yearA = a.birthYear ? parseInt(a.birthYear, 10) : null;
+      const yearB = b.birthYear ? parseInt(b.birthYear, 10) : null;
+      const hasYearA = yearA !== null && !isNaN(yearA) && yearA > 0;
+      const hasYearB = yearB !== null && !isNaN(yearB) && yearB > 0;
+
+      if (hasYearA && hasYearB && yearA !== yearB) {
+        return yearA - yearB;
+      }
+
+      // 2. Explicit or sequential order (1 = oldest / primer hijo, 2, 3...)
+      const hasOrdA = a.order !== undefined && a.order !== null && a.order !== '';
+      const hasOrdB = b.order !== undefined && b.order !== null && b.order !== '';
+      const ordA = hasOrdA ? parseFloat(a.order) : (members.indexOf(a) + 1);
+      const ordB = hasOrdB ? parseFloat(b.order) : (members.indexOf(b) + 1);
+
+      if (ordA !== ordB) {
+        return ordA - ordB;
+      }
+
+      // If one had an explicit order and the other had default index order, explicit order takes priority
+      if (hasOrdA && !hasOrdB) return -1;
+      if (!hasOrdA && hasOrdB) return 1;
+
+      // 3. Fallback: preserve relative position in members array
+      return members.indexOf(a) - members.indexOf(b);
+    });
+  }
+
+  function getSiblingPeers(member) {
+    if (!member) return [];
+    if (member.parentId) {
+      return familyData.members.filter(m => 
+        (m.parentId === member.parentId || (member.spouseId && m.parentId === member.spouseId)) &&
+        !m.role?.includes('Cónyuge')
+      );
+    }
+    if (member.generation === 2) {
+      return familyData.members.filter(m => m.generation === 2 && !m.role?.includes('Cónyuge'));
+    }
+    if (member.generation === 3 && member.branch) {
+      return familyData.members.filter(m => m.generation === 3 && m.branch === member.branch && !m.role?.includes('Cónyuge'));
+    }
+    return [member];
+  }
+
+  function renderModalSiblingOrder(member) {
+    const box = document.getElementById('modalSiblingOrderBox');
+    const listEl = document.getElementById('modalSiblingList');
+    const btnOlder = document.getElementById('btnMoveOlder');
+    const btnYounger = document.getElementById('btnMoveYounger');
+    if (!box || !listEl || !btnOlder || !btnYounger) return;
+
+    if (!member || !member.id) {
+      box.style.display = 'none';
+      return;
+    }
+
+    const peers = getSiblingPeers(member);
+    if (peers.length <= 1) {
+      box.style.display = 'none';
+      return;
+    }
+
+    box.style.display = 'flex';
+    const sortedPeers = sortMembersByAge(peers);
+    const currentIndex = sortedPeers.findIndex(p => p.id === member.id);
+
+    listEl.innerHTML = '';
+    sortedPeers.forEach((p, idx) => {
+      const chip = document.createElement('div');
+      chip.className = `sibling-chip ${p.id === member.id ? 'active' : ''}`;
+      const yearStr = p.birthYear ? ` (${p.birthYear})` : '';
+      chip.textContent = `${idx + 1}. ${p.name}${yearStr}`;
+      listEl.appendChild(chip);
+    });
+
+    btnOlder.disabled = (currentIndex <= 0);
+    btnYounger.disabled = (currentIndex === -1 || currentIndex >= sortedPeers.length - 1);
+  }
+
+  function moveMemberRelative(direction) {
+    if (!activeMemberId) return;
+    const member = getMember(activeMemberId);
+    if (!member) return;
+
+    const peers = getSiblingPeers(member);
+    if (peers.length <= 1) return;
+
+    const sortedPeers = sortMembersByAge(peers);
+    const currentIndex = sortedPeers.findIndex(p => p.id === member.id);
+    const targetIndex = currentIndex + direction;
+
+    if (targetIndex < 0 || targetIndex >= sortedPeers.length) return;
+
+    sortedPeers.forEach((p, i) => {
+      p.order = i + 1;
+    });
+
+    const targetMember = sortedPeers[targetIndex];
+    const tempOrder = member.order;
+    member.order = targetMember.order;
+    targetMember.order = tempOrder;
+
+    const formOrderEl = document.getElementById('formOrder');
+    if (formOrderEl) formOrderEl.value = member.order;
+
+    saveData();
+    saveMemberToCloud(member);
+    saveMemberToCloud(targetMember);
+
+    renderModalSiblingOrder(member);
+    renderAll();
+
+    const relationMsg = direction < 0 
+      ? `⬆️ ${member.name} ahora está ordenado antes de ${targetMember.name} (mayor).`
+      : `⬇️ ${member.name} ahora está ordenado después de ${targetMember.name} (menor).`;
+    showToast(relationMsg);
+  }
+
   function renderStandardBranchDescendants(container, branchId) {
-    // Group Gen 3 members into couples or singles
-    const gen3Members = familyData.members.filter(m => m.branch === branchId && m.generation === 3);
+    // Group Gen 3 members into couples or singles, sorted oldest to youngest
+    const gen3All = familyData.members.filter(m => m.branch === branchId && m.generation === 3);
+    const bloodlineGen3 = sortMembersByAge(gen3All.filter(m => !m.role?.includes('Cónyuge')));
+    const otherGen3 = gen3All.filter(m => !bloodlineGen3.includes(m) && !m.spouseId);
+    const gen3Members = [...bloodlineGen3, ...otherGen3];
+
     const renderedGen3 = new Set();
     const gen3Row = document.createElement('div');
     gen3Row.className = 'subgroup-couples';
@@ -854,13 +1021,42 @@
       }
       groupContainer.appendChild(coupleDiv);
 
-      // Children of this couple (Gen 4)
+      // Children of this couple (Gen 4) sorted from oldest to youngest
       const children = familyData.members.filter(c => c.parentId === m.id || (m.spouseId && c.parentId === m.spouseId));
       if (children.length > 0) {
+        const sortedChildren = sortMembersByAge(children);
         const kidsRow = document.createElement('div');
         kidsRow.className = 'children-row';
-        children.forEach(child => {
-          kidsRow.appendChild(createMemberCard(child, true));
+        sortedChildren.forEach(child => {
+          // If child has children (Gen 5)
+          const grandKids = familyData.members.filter(gc => gc.parentId === child.id || (child.spouseId && gc.parentId === child.spouseId));
+          if (grandKids.length > 0) {
+            const subWrap = document.createElement('div');
+            subWrap.style.display = 'flex';
+            subWrap.style.flexDirection = 'column';
+            subWrap.style.alignItems = 'center';
+            subWrap.style.gap = '0.4rem';
+
+            const childCouple = document.createElement('div');
+            childCouple.className = 'couple-group';
+            childCouple.appendChild(createMemberCard(child, true));
+            if (child.spouseId) {
+              const chSpouse = getMember(child.spouseId);
+              if (chSpouse) childCouple.appendChild(createMemberCard(chSpouse, true));
+            }
+            subWrap.appendChild(childCouple);
+
+            const gkRow = document.createElement('div');
+            gkRow.className = 'children-row';
+            const sortedGrandKids = sortMembersByAge(grandKids);
+            sortedGrandKids.forEach(gk => {
+              gkRow.appendChild(createMemberCard(gk, true));
+            });
+            subWrap.appendChild(gkRow);
+            kidsRow.appendChild(subWrap);
+          } else {
+            kidsRow.appendChild(createMemberCard(child, true));
+          }
         });
         groupContainer.appendChild(kidsRow);
       }
@@ -872,11 +1068,12 @@
   }
 
   function renderFernandoBranchDescendants(container) {
-    const branchMembers = familyData.members.filter(m => m.branch === 'fernando' && m.generation >= 3);
+    const branchMembersAll = familyData.members.filter(m => m.branch === 'fernando' && m.generation >= 3);
+    const bloodlineGen3 = sortMembersByAge(branchMembersAll.filter(m => m.generation === 3 && !m.role?.includes('Cónyuge')));
     const rendered = new Set();
 
-    branchMembers.forEach(m => {
-      if (rendered.has(m.id) || m.generation > 3) return;
+    bloodlineGen3.forEach(m => {
+      if (rendered.has(m.id)) return;
 
       const group = document.createElement('div');
       group.className = 'branch-couples-wrap';
@@ -895,12 +1092,13 @@
       }
       group.appendChild(couple);
 
-      // Children
-      const kids = familyData.members.filter(c => c.parentId === m.id);
+      // Children sorted from oldest to youngest
+      const kids = familyData.members.filter(c => c.parentId === m.id || (m.spouseId && c.parentId === m.spouseId));
       if (kids.length > 0) {
+        const sortedKids = sortMembersByAge(kids);
         const kidsRow = document.createElement('div');
         kidsRow.className = 'children-row';
-        kids.forEach(k => {
+        sortedKids.forEach(k => {
           kidsRow.appendChild(createMemberCard(k, true));
           rendered.add(k.id);
         });
@@ -985,13 +1183,28 @@
     }
     card.appendChild(surnameEl);
 
-    // Role / Generation
-    if (!isCompact || member.badge) {
-      const roleEl = document.createElement('div');
-      roleEl.className = 'card-role';
-      roleEl.textContent = member.role || `Gen ${member.generation}`;
-      card.appendChild(roleEl);
+    // Role / Generation / BirthYear
+    const roleEl = document.createElement('div');
+    roleEl.className = 'card-role';
+    let roleText = '';
+    if (!isCompact) {
+      roleText = member.role || `Gen ${member.generation}`;
+      if (member.birthYear) {
+        roleText += ` • ${member.birthYear}`;
+      }
+    } else {
+      if (member.birthYear) {
+        roleText = `${member.birthYear}`;
+      } else if (member.role && member.role !== 'Hijo/a' && member.role !== 'Bisnieto') {
+        roleText = member.role;
+      }
     }
+    if (roleText) {
+      roleEl.textContent = roleText;
+    } else {
+      roleEl.innerHTML = '&nbsp;';
+    }
+    card.appendChild(roleEl);
 
     // Special badge (e.g. Sacerdote)
     if (member.badge) {
@@ -1117,7 +1330,11 @@
       const section = document.createElement('div');
       section.className = 'branch-section-card';
 
-      const membersInBranch = familyData.members.filter(m => m.branch === branch.id);
+      const rawMembersInBranch = familyData.members.filter(m => m.branch === branch.id);
+      const membersInBranch = [...rawMembersInBranch].sort((a, b) => {
+        if (a.generation !== b.generation) return a.generation - b.generation;
+        return sortMembersByAge([a, b])[0] === a ? -1 : 1;
+      });
       const withPhotoCount = membersInBranch.filter(m => m.photo).length;
 
       section.innerHTML = `
@@ -1160,6 +1377,11 @@
         if (!matchesName && !matchesFullName && !matchesRole) return false;
       }
       return true;
+    });
+
+    list.sort((a, b) => {
+      if (a.generation !== b.generation) return a.generation - b.generation;
+      return sortMembersByAge([a, b])[0] === a ? -1 : 1;
     });
 
     // Update Directory stats
@@ -1378,10 +1600,15 @@
     document.getElementById('formRole').value = member.role || '';
     document.getElementById('formBadge').value = member.badge || '';
     document.getElementById('formGender').value = member.gender || 'M';
+    document.getElementById('formBirthYear').value = member.birthYear || '';
+    document.getElementById('formOrder').value = (member.order !== undefined && member.order !== null) ? member.order : '';
     document.getElementById('formNotes').value = member.notes || '';
 
     // Populate Parent & Spouse selects
     populateSpouseAndParentSelects(member);
+
+    // Sibling / Peer ordering box
+    renderModalSiblingOrder(member);
 
     // Photo preview
     renderModalPhotoPreview(currentModalPhoto, member.name);
@@ -1513,6 +1740,14 @@
     member.role = document.getElementById('formRole').value.trim() || (isNew ? 'Integrante' : '');
     member.badge = document.getElementById('formBadge').value.trim();
     member.gender = document.getElementById('formGender').value || 'M';
+    const rawBirthYear = document.getElementById('formBirthYear').value.trim();
+    member.birthYear = rawBirthYear ? parseInt(rawBirthYear, 10) : null;
+    const rawOrder = document.getElementById('formOrder').value.trim();
+    member.order = rawOrder ? parseFloat(rawOrder) : null;
+    if (isNew && member.order === null && !member.birthYear) {
+      const peers = getSiblingPeers(member);
+      member.order = peers.length > 0 ? peers.length : 1;
+    }
     member.spouseId = document.getElementById('formSpouse').value || null;
     member.parentId = document.getElementById('formParent').value || null;
     member.notes = document.getElementById('formNotes').value.trim();
@@ -1572,6 +1807,13 @@
     document.getElementById('formRole').value = preset.role || 'Nuevo integrante';
     document.getElementById('formBadge').value = preset.badge || '';
     document.getElementById('formGender').value = preset.gender || 'M';
+    document.getElementById('formBirthYear').value = preset.birthYear || '';
+    if (preset.parentId) {
+      const siblings = familyData.members.filter(c => c.parentId === preset.parentId && !c.role?.includes('Cónyuge'));
+      document.getElementById('formOrder').value = preset.order || (siblings.length + 1);
+    } else {
+      document.getElementById('formOrder').value = preset.order || '';
+    }
     document.getElementById('formNotes').value = preset.notes || '';
 
     populateSpouseAndParentSelects({
@@ -1587,6 +1829,7 @@
       document.getElementById('formSpouse').value = preset.spouseId;
     }
 
+    renderModalSiblingOrder(null);
     renderModalPhotoPreview(null, 'Nuevo');
     memberModal.classList.add('active');
   }
@@ -1595,6 +1838,8 @@
     memberModal.classList.remove('active');
     activeMemberId = null;
     currentModalPhoto = null;
+    const siblingBox = document.getElementById('modalSiblingOrderBox');
+    if (siblingBox) siblingBox.style.display = 'none';
   }
 
   // --- EXPORT & IMPORT MODULES ---
@@ -1632,7 +1877,7 @@
   }
 
   function exportCsvFile() {
-    const headers = ['ID', 'Nombre', 'Nombre Completo', 'Rama Familiar', 'Generacion', 'Rol', 'Distincion', 'Tiene Foto', 'Conyuge', 'Progenitor', 'Notas'];
+    const headers = ['ID', 'Nombre', 'Nombre Completo', 'Rama Familiar', 'Generacion', 'Rol', 'Distincion', 'Tiene Foto', 'Año Nacimiento', 'Orden', 'Conyuge', 'Progenitor', 'Notas'];
     const rows = familyData.members.map(m => {
       const branch = getBranch(m.branch).name;
       return [
@@ -1644,6 +1889,8 @@
         `"${m.role || ''}"`,
         `"${m.badge || ''}"`,
         m.photo ? 'SI' : 'NO',
+        m.birthYear ? `"${m.birthYear}"` : '""',
+        (m.order !== undefined && m.order !== null) ? `"${m.order}"` : '""',
         `"${m.spouseId || ''}"`,
         `"${m.parentId || ''}"`,
         `"${(m.notes || '').replace(/"/g, '""')}"`

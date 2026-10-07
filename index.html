@@ -330,6 +330,30 @@
             </select>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formBirthYear">📅 Año de nacimiento / Edad</label>
+              <input type="number" id="formBirthYear" placeholder="Ej: 1985" min="1800" max="2099">
+              <span class="field-help-text">Ordena automáticamente de mayor a menor</span>
+            </div>
+            <div class="form-group">
+              <label for="formOrder">🔢 Orden (1 = El más grande)</label>
+              <input type="number" id="formOrder" placeholder="1 = Mayor, 2, 3..." min="1" max="99">
+              <span class="field-help-text">1 = El más grande / primer hijo, 2 = siguiente, etc.</span>
+            </div>
+          </div>
+
+          <div id="modalSiblingOrderBox" class="sibling-order-box" style="display: none;">
+            <div class="sibling-order-header">
+              <span class="sibling-order-title">👨‍👩‍👧‍👦 Posición entre hermanos / familia (del más grande al más chico):</span>
+            </div>
+            <div class="sibling-order-controls">
+              <button type="button" id="btnMoveOlder" class="btn secondary small">⬅️ Mover antes (Mayor)</button>
+              <button type="button" id="btnMoveYounger" class="btn secondary small">➡️ Mover después (Menor)</button>
+            </div>
+            <div id="modalSiblingList" class="sibling-order-list"></div>
+          </div>
+
           <div class="form-group">
             <label for="formNotes">Notas biográficas / Recuerdos</label>
             <textarea id="formNotes" rows="3" placeholder="Información adicional sobre este integrante..."></textarea>
